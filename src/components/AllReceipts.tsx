@@ -336,7 +336,7 @@ export default function AllReceipts({
 
   return (
     <div className="bg-white min-h-screen w-full overflow-hidden flex items-center justify-center" data-name="All Receipts">
-      <div className="relative w-full max-w-[393px] min-h-screen mx-auto">
+      <div className="relative w-full max-w-[393px] md:max-w-[500px] lg:max-w-[600px] min-h-screen mx-auto">
         {/* Header */}
         <div className="relative h-[60px] w-full">
           <Header onBack={onBack} />

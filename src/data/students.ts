@@ -15,9 +15,9 @@ export interface ParentData {
 
 // Parent to student mapping based on phone numbers
 export const PARENT_STUDENT_MAP: Record<string, ParentData> = {
-  "0977123456": {
+  "977123456": {
     name: "Mr Stephen Kapambwe",
-    phone: "0977123456",
+    phone: "977123456",
     students: [
       {
         name: "Talitha Kapambwe",
@@ -33,9 +33,9 @@ export const PARENT_STUDENT_MAP: Record<string, ParentData> = {
       },
     ],
   },
-  "0966987654": {
+  "966987654": {
     name: "Mrs Alice Mwamba",
-    phone: "0966987654",
+    phone: "966987654",
     students: [
       {
         name: "John Mwansa",

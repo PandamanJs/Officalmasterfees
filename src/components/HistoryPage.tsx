@@ -539,7 +539,7 @@ export default function HistoryPage({ userName, userPhone, onBack, onViewAllRece
 
   return (
     <div className="bg-white min-h-screen w-full overflow-hidden flex items-center justify-center">
-      <div className="relative w-full max-w-[393px] min-h-screen mx-auto">
+      <div className="relative w-full max-w-[393px] md:max-w-[500px] lg:max-w-[600px] min-h-screen mx-auto">
         <AnimatedBackground />
         
         {/* Header */}

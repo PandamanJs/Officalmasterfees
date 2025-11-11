@@ -345,7 +345,7 @@ export default function PayForSchoolFees({
 
   return (
     <div className="bg-white min-h-screen w-full overflow-hidden flex items-center justify-center" data-name="Pay for school fees page 1">
-      <div className="relative w-full max-w-[393px] h-screen mx-auto bg-white flex flex-col">
+      <div className="relative w-full max-w-[393px] md:max-w-[500px] lg:max-w-[600px] h-screen mx-auto bg-white flex flex-col">
         {/* Header - Fixed height */}
         <div className="flex-shrink-0">
           <Header onBack={onBack} />
@@ -395,7 +395,7 @@ export default function PayForSchoolFees({
               className="bg-[#003630] w-full h-[55px] rounded-[12px] touch-manipulation active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 shadow-[0px_2px_8px_rgba(0,54,48,0.3)]" 
               data-name="Button"
             >
-              <p className="font-['IBM_Plex_Sans_Devanagari:Bold',sans-serif] leading-[24px] not-italic text-[16px] text-nowrap text-white tracking-[-0.16px] whitespace-pre">Select Services</p>
+              <p className="font-['IBM_Plex_Sans_Devanagari:Bold',sans-serif] leading-[24px] not-italic text-[16px] text-nowrap text-white tracking-[-0.16px] whitespace-pre text-center">Select Services</p>
             </button>
           </div>
         </div>

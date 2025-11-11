@@ -295,7 +295,7 @@ export default function CheckoutPage({ services, onBack, onProceed }: CheckoutPa
 
   return (
     <div className="bg-white h-screen w-full overflow-hidden flex justify-center">
-      <div className="relative w-full max-w-[393px] h-screen shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]" data-name="Checkout page 1">
+      <div className="relative w-full max-w-[393px] md:max-w-[500px] lg:max-w-[600px] h-screen shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]" data-name="Checkout page 1">
         <Header onBack={onBack} />
         <p className="absolute font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] leading-[24px] left-[44px] not-italic text-[18px] text-black top-[118px] tracking-[-0.18px] w-[311px]">Checkout</p>
         <Frame2 services={services} paymentAmount={paymentAmount} onAmountChange={setPaymentAmount} onProceed={() => setShowReceipts(true)} onPayInPart={() => setShowPayInPart(true)} />

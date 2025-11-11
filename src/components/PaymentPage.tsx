@@ -440,24 +440,13 @@ function Frame17({ totalAmount }: { totalAmount: number }) {
       <div className="absolute flex h-[calc(1px*((var(--transform-inner-width)*0.9937769770622253)+(var(--transform-inner-height)*0.11138830333948135)))] items-center justify-center right-[0px] top-0 w-[calc(1px*((var(--transform-inner-height)*0.9937769770622253)+(var(--transform-inner-width)*0.11138830333948135)))]" style={{ "--transform-inner-width": "102.734375", "--transform-inner-height": "64.03125" } as React.CSSProperties}>
         <div className="flex-none rotate-[263.605deg]">
           <div className="h-[64.042px] relative w-[102.745px]" data-name="path60 (Stroke)">
-            <motion.div 
+            <div 
               className="absolute inset-[-0.78%_-0.49%]"
-              animate={{
-                x: [100, -100],
-                opacity: [0, 1, 1, 0],
-              }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                ease: "linear",
-                times: [0, 0.1, 0.9, 1],
-                delay: 0.5,
-              }}
             >
               <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 104 66">
                 <path d={svgPaths.p32888500} id="path60 (Stroke)" stroke="var(--stroke-0, #003630)" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>
@@ -545,14 +534,14 @@ function Group1({
   isPayDisabled?: boolean;
 }) {
   return (
-    <div className="relative h-full flex flex-col px-[24px] pt-[23px] pb-[24px]">
-      {/* Total Amount Section */}
-      <div className="shrink-0 mb-[40px]">
+    <div className="h-full flex flex-col">
+      {/* Total Amount Section - Fixed at top */}
+      <div className="flex-shrink-0 px-[24px] pt-[23px] pb-[20px]">
         <Group totalAmount={totalAmount} />
       </div>
 
-      {/* Payment Options */}
-      <div className="flex-1 min-h-0 flex flex-col">
+      {/* Payment Options - Scrollable area */}
+      <div className="flex-1 overflow-y-auto px-[24px] pb-[20px]" style={{ WebkitOverflowScrolling: 'touch' }}>
         <Frame19 
           isMobileMoneyExpanded={isMobileMoneyExpanded} 
           onMobileMoneyClick={onMobileMoneyClick} 
@@ -572,21 +561,23 @@ function Group1({
         />
       </div>
 
-      {/* Pay Button and Security Info */}
-      <div className="shrink-0 flex flex-col items-center gap-[20px] mt-[20px]">
-        <button 
-          onClick={onPay}
-          disabled={isPayDisabled}
-          className={`box-border content-stretch flex gap-[8px] h-[59px] items-center justify-center overflow-clip px-[24px] py-[10px] rounded-[12px] w-full max-w-[296px] touch-manipulation transition-all ${
-            isPayDisabled 
-              ? 'bg-gray-400 cursor-not-allowed opacity-60' 
-              : 'bg-[#003630] active:scale-[0.98]'
-          }`}
-          data-name="Button"
-        >
-          <p className="font-['IBM_Plex_Sans_Devanagari:SemiBold',sans-serif] leading-[24px] not-italic relative shrink-0 text-[16px] text-nowrap text-white tracking-[-0.16px] whitespace-pre">Pay</p>
-        </button>
-        <Frame18 isMobileMoneyExpanded={isMobileMoneyExpanded} isCardPaymentExpanded={isCardPaymentExpanded} />
+      {/* Pay Button and Security Info - Fixed at bottom */}
+      <div className="flex-shrink-0 px-[24px] pb-[20px] pt-[16px] bg-white" style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom))' }}>
+        <div className="flex flex-col items-center gap-[20px]">
+          <button 
+            onClick={onPay}
+            disabled={isPayDisabled}
+            className={`box-border content-stretch flex gap-[8px] h-[59px] items-center justify-center overflow-clip px-[24px] py-[10px] rounded-[12px] w-full max-w-[296px] touch-manipulation transition-all shadow-[0px_2px_8px_rgba(0,54,48,0.3)] ${
+              isPayDisabled 
+                ? 'bg-gray-400 cursor-not-allowed opacity-60' 
+                : 'bg-[#003630] active:scale-[0.98]'
+            }`}
+            data-name="Button"
+          >
+            <p className="font-['IBM_Plex_Sans_Devanagari:SemiBold',sans-serif] leading-[24px] not-italic relative shrink-0 text-[16px] text-nowrap text-white tracking-[-0.16px] whitespace-pre">Pay</p>
+          </button>
+          <Frame18 isMobileMoneyExpanded={isMobileMoneyExpanded} isCardPaymentExpanded={isCardPaymentExpanded} />
+        </div>
       </div>
     </div>
   );
@@ -741,7 +732,7 @@ export default function PaymentPage({ onBack, onPay, totalAmount }: PaymentPageP
 
   return (
     <div className="bg-white h-screen w-full overflow-hidden flex items-center justify-center">
-      <div className="relative w-full max-w-[393px] h-screen mx-auto shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden" data-name="Payment Page">
+      <div className="relative w-full max-w-[393px] md:max-w-[500px] lg:max-w-[600px] h-screen mx-auto shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden" data-name="Payment Page">
         <Header onBack={onBack} />
         
         <div className="relative bg-white flex-1 overflow-hidden">

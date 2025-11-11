@@ -142,60 +142,19 @@ function StudentServiceGroup({
   );
 }
 
-function Frame2({ 
-  services, 
-  inputAmounts, 
-  onAmountChange 
-}: { 
-  services: Service[]; 
-  inputAmounts: Record<string, number>;
-  onAmountChange: (serviceId: string, value: number) => void;
-}) {
-  // Group services by student
-  const servicesByStudent = services.reduce((acc, service) => {
-    if (!acc[service.studentName]) {
-      acc[service.studentName] = [];
-    }
-    acc[service.studentName].push(service);
-    return acc;
-  }, {} as Record<string, Service[]>);
-
-  return (
-    <div className="absolute bg-white box-border flex flex-col gap-4 h-[379px] left-[33px] overflow-y-auto pb-6 pt-5 px-4 rounded-[18px] top-[381px] w-[327px]">
-      <p className="font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] text-[12px] text-black">Enter the amount you want to pay.</p>
-      <div className="flex flex-col gap-5">
-        {Object.entries(servicesByStudent).map(([studentName, studentServices]) => (
-          <StudentServiceGroup 
-            key={studentName}
-            studentName={studentName}
-            services={studentServices}
-            inputAmounts={inputAmounts}
-            onAmountChange={onAmountChange}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function Group({ total }: { total: number }) {
   return (
-    <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid leading-[0] place-items-start relative shrink-0 w-full">
-      <div className="[grid-area:1_/_1] h-[56px] ml-0 mt-0 rounded-[10px] w-[278.824px]" />
-      <div className="[grid-area:1_/_1] flex flex-col font-['IBM_Plex_Sans_Devanagari:SemiBold',sans-serif] justify-end ml-[214.941px] mt-[38px] not-italic relative text-[24px] text-black translate-y-[-100%] w-[82.058px]">
-        <p className="leading-[1.4]">{total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-      </div>
-      <div className="[grid-area:1_/_1] flex flex-col font-['IBM_Plex_Sans_Devanagari:SemiBold',sans-serif] justify-center ml-0 mt-[26.5px] not-italic relative text-[12px] text-black translate-y-[-50%] w-[59.042px]">
-        <p className="leading-[1.4]">Total</p>
-      </div>
+    <div className="flex items-center justify-between w-full">
+      <p className="font-['IBM_Plex_Sans_Devanagari:SemiBold',sans-serif] text-[12px] text-black">Total</p>
+      <p className="font-['IBM_Plex_Sans_Devanagari:SemiBold',sans-serif] text-[24px] text-black">{total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
     </div>
   );
 }
 
 function Frame20({ total }: { total: number }) {
   return (
-    <div className="absolute bg-[rgba(255,255,255,0.1)] h-[144px] left-[36px] rounded-[18px] top-[164px] w-[327px]">
-      <div className="box-border content-stretch flex flex-col gap-[10px] h-[144px] items-start overflow-clip pb-[20px] pt-[15px] px-[15px] relative rounded-[inherit] w-[327px]">
+    <div className="bg-[rgba(255,255,255,0.1)] rounded-[18px] w-full max-w-[327px] mx-auto">
+      <div className="box-border content-stretch flex flex-col gap-[10px] items-start overflow-clip pb-[20px] pt-[15px] px-[15px] relative rounded-[inherit]">
         <div className="h-[25px] overflow-clip relative shrink-0 w-[24px]" data-name="Interface / Shopping_Bag_01">
           <div className="absolute inset-[16.67%_12.5%]" data-name="Vector">
             <div className="absolute inset-[-6%_-5.56%]" style={{ "--stroke-0": "rgba(0, 0, 0, 1)" } as React.CSSProperties}>
@@ -269,13 +228,43 @@ function Group1({
   const total = Object.values(inputAmounts).reduce((sum, amount) => sum + amount, 0);
   
   return (
-    <div className="absolute contents left-[33px] top-[123px]">
-      <p className="absolute font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] leading-[24px] left-[49px] not-italic text-[18px] text-black top-[123px] tracking-[-0.18px] w-[311px]">Checkout</p>
-      <Frame2 services={services} inputAmounts={inputAmounts} onAmountChange={onAmountChange} />
-      <Frame20 total={total} />
+    <div className="flex flex-col h-full px-4 pt-6 pb-4">
+      <p className="font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] leading-[24px] not-italic text-[18px] text-black tracking-[-0.18px] mb-4">Checkout</p>
+      
+      <div className="mb-4">
+        <Frame20 total={total} />
+      </div>
+      
+      <div className="flex-1 min-h-0 mb-4">
+        <div className="bg-white box-border flex flex-col gap-4 h-full overflow-y-auto pb-6 pt-5 px-4 rounded-[18px] w-full max-w-[327px] mx-auto">
+          <p className="font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] text-[12px] text-black">Enter the amount you want to pay.</p>
+          <div className="flex flex-col gap-5">
+            {(() => {
+              const servicesByStudent = services.reduce((acc, service) => {
+                if (!acc[service.studentName]) {
+                  acc[service.studentName] = [];
+                }
+                acc[service.studentName].push(service);
+                return acc;
+              }, {} as Record<string, Service[]>);
+              
+              return Object.entries(servicesByStudent).map(([studentName, studentServices]) => (
+                <StudentServiceGroup 
+                  key={studentName}
+                  studentName={studentName}
+                  services={studentServices}
+                  inputAmounts={inputAmounts}
+                  onAmountChange={onAmountChange}
+                />
+              ));
+            })()}
+          </div>
+        </div>
+      </div>
+      
       <button 
         onClick={onProceed}
-        className="absolute bg-[#003630] box-border content-stretch flex gap-[8px] h-[59px] items-center justify-center left-1/2 overflow-clip px-[24px] py-[10px] rounded-[12px] top-[771px] translate-x-[-50%] w-[327px] touch-manipulation active:scale-[0.98] transition-transform" 
+        className="bg-[#003630] box-border content-stretch flex gap-[8px] h-[59px] items-center justify-center overflow-clip px-[24px] py-[10px] rounded-[12px] w-full max-w-[327px] mx-auto touch-manipulation active:scale-[0.98] transition-transform" 
         data-name="Button"
       >
         <p className="font-['IBM_Plex_Sans_Devanagari:Bold',sans-serif] leading-[24px] not-italic relative shrink-0 text-[18px] text-nowrap text-white tracking-[-0.18px] whitespace-pre">Proceed</p>
@@ -319,9 +308,9 @@ export default function CheckoutPage2({ services, onBack, onProceed }: CheckoutP
 
   return (
     <div className="bg-white h-screen w-full overflow-hidden flex justify-center">
-      <div className="relative w-full max-w-[393px] h-screen shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]" data-name="Checkout page 2">
+      <div className="flex flex-col w-full max-w-[393px] h-screen shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]" data-name="Checkout page 2">
         <Header onBack={onBack} />
-        <div className="absolute contents left-[33px] top-[123px]">
+        <div className="flex-1 min-h-0">
           <Group1 
             services={services} 
             inputAmounts={inputAmounts}

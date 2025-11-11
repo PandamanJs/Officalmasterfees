@@ -578,7 +578,7 @@ export default function AddServicesPage({ selectedStudentIds, userPhone, onBack,
 
   return (
     <div className="bg-white h-screen w-full overflow-hidden flex items-center justify-center">
-      <div className="relative w-full max-w-[393px] h-screen mx-auto shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex flex-col">
+      <div className="relative w-full max-w-[393px] md:max-w-[500px] lg:max-w-[600px] h-screen mx-auto shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex flex-col">
         <Header onBack={onBack} />
         
         <div className="flex-1 flex flex-col px-[24px] pt-[12px] pb-[8px] overflow-hidden">

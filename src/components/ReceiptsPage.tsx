@@ -186,7 +186,7 @@ export default function ReceiptsPage({ onBack, onNext }: ReceiptsPageProps) {
 
   return (
     <div className="bg-white h-screen w-full overflow-hidden flex items-center justify-center">
-      <div className="relative w-full max-w-[393px] h-screen mx-auto shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]" data-name="Receipts Page">
+      <div className="relative w-full max-w-[393px] md:max-w-[500px] lg:max-w-[600px] h-screen mx-auto shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]" data-name="Receipts Page">
         <Header onBack={onBack} />
         <p className="absolute font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] leading-[24px] left-[44px] not-italic text-[18px] text-black top-[134px] tracking-[-0.18px] w-[311px]">Checkout</p>
         <div className="absolute bg-white box-border content-stretch flex flex-col gap-[16px] h-[419px] items-start left-[23px] pb-[30px] pt-[20px] px-[25px] rounded-[18px] top-[176px] w-[346px]">

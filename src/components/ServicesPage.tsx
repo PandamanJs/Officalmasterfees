@@ -263,7 +263,7 @@ export default function ServicesPage({ userName, onBack, onSelectService, onView
 
   return (
     <div className="bg-white min-h-screen w-full overflow-hidden flex items-center justify-center" data-name="Page 2">
-      <div className="relative w-full max-w-[393px] h-screen mx-auto">
+      <div className="relative w-full max-w-[393px] md:max-w-[500px] lg:max-w-[600px] h-screen mx-auto">
         <PageGroup2 onBack={onBack} />
         <div className="absolute font-['Inter:Regular',sans-serif] font-normal h-[33px] leading-[0.5] left-[48px] not-italic text-[18px] text-black top-[164px] tracking-[-0.18px] w-[279px]">
           <p className="font-['IBM_Plex_Sans_Devanagari:Light',sans-serif] mb-[14px]">{greeting}, </p>

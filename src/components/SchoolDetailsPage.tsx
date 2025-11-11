@@ -395,7 +395,7 @@ export default function SchoolDetailsPage({ schoolName, onProceed, onBack }: Sch
 
   return (
     <div className="bg-white min-h-screen w-full flex justify-center">
-      <div className="bg-white relative w-full max-w-[393px] h-screen overflow-hidden" data-name="Page 1">
+      <div className="bg-white relative w-full max-w-[393px] md:max-w-[500px] lg:max-w-[600px] h-screen overflow-hidden" data-name="Page 1">
         <Header onBack={onBack} />
         <SchoolTitle schoolName={schoolName} />
         <InputSection onValidationChange={handleValidationChange} />
