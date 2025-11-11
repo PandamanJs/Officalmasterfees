@@ -2,12 +2,19 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
 
+/**
+ * Interface for each tutorial step
+ */
 interface TutorialStep {
-  title: string;
-  description: string;
-  position: "center" | "top" | "bottom";
+  title: string;        // Step heading with emoji
+  description: string;  // Detailed explanation
+  position: "center" | "top" | "bottom";  // Vertical positioning
 }
 
+/**
+ * Tutorial step content
+ * Guides users through the main features of the app
+ */
 const tutorialSteps: TutorialStep[] = [
   {
     title: "Welcome to Master-Fees! 👋",
@@ -47,13 +54,17 @@ const tutorialSteps: TutorialStep[] = [
 ];
 
 interface TutorialProps {
-  onComplete: () => void;
+  onComplete: () => void;  // Callback when tutorial is finished
 }
 
 export default function Tutorial({ onComplete }: TutorialProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
 
+  /**
+   * Handle next button click
+   * Advances to next step or completes the tutorial
+   */
   const handleNext = () => {
     if (currentStep < tutorialSteps.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -62,10 +73,18 @@ export default function Tutorial({ onComplete }: TutorialProps) {
     }
   };
 
+  /**
+   * Handle skip button click
+   * Immediately completes the tutorial
+   */
   const handleSkip = () => {
     handleComplete();
   };
 
+  /**
+   * Complete the tutorial
+   * Animates out and calls the onComplete callback
+   */
   const handleComplete = () => {
     setIsVisible(false);
     setTimeout(() => {
@@ -76,6 +95,10 @@ export default function Tutorial({ onComplete }: TutorialProps) {
   const currentStepData = tutorialSteps[currentStep];
   const isLastStep = currentStep === tutorialSteps.length - 1;
 
+  /**
+   * Get positioning classes based on step configuration
+   * Controls where the tutorial card appears on screen
+   */
   const getPositionClasses = () => {
     switch (currentStepData.position) {
       case "top":

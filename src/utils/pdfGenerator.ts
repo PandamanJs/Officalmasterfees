@@ -1,5 +1,20 @@
+/**
+ * PDF Receipt Generator Utility
+ * 
+ * Generates professional payment receipts in PDF format using jsPDF
+ * Features:
+ * - Master-Fees branding with logo
+ * - Service breakdown table
+ * - 2% service fee calculation
+ * - Responsive layout with proper spacing
+ * - Black and white professional design
+ */
+
 import jsPDF from 'jspdf';
 
+/**
+ * Interface for checkout service items
+ */
 interface CheckoutService {
   id: string;
   description: string;
@@ -8,19 +23,29 @@ interface CheckoutService {
   studentName: string;
 }
 
+/**
+ * Interface for receipt data
+ * Contains all information needed to generate a receipt
+ */
 interface ReceiptData {
-  schoolName: string;
-  totalAmount: number;
-  refNumber: string;
-  dateTime: string;
-  scheduleId: string;
-  services?: CheckoutService[];
+  schoolName: string;    // Name of the school
+  totalAmount: number;   // Total payment amount (before service fee)
+  refNumber: string;     // Payment reference number
+  dateTime: string;      // Payment date and time
+  scheduleId: string;    // Schedule/transaction ID
+  services?: CheckoutService[];  // List of services paid for
 }
 
+/**
+ * Generate a PDF receipt from payment data
+ * 
+ * @param data - Receipt data containing payment details and services
+ * @returns void - Saves PDF file directly to user's device
+ */
 export function generateReceiptPDF(data: ReceiptData) {
   const { schoolName, totalAmount, refNumber, dateTime, scheduleId, services = [] } = data;
   
-  // Create a new PDF document
+  // Create a new PDF document in portrait A4 format
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -29,35 +54,38 @@ export function generateReceiptPDF(data: ReceiptData) {
 
   const pageWidth = doc.internal.pageSize.getWidth();
   
-  // Calculate service fee (2%)
+  // Calculate service fee (2% of total)
   const serviceFee = totalAmount * 0.02;
   const totalWithFee = totalAmount + serviceFee;
 
-  // White background (default)
-  let yPos = 25;
+  // Page layout configuration
+  let yPos = 25;  // Current Y position for content
   const leftMargin = 20;
   const rightMargin = pageWidth - 20;
   const contentWidth = rightMargin - leftMargin;
 
-  // Add Master-Fees Icon (simplified checkmark in diamond)
+  // === HEADER SECTION ===
+  
+  // Add Master-Fees Icon (checkmark in diamond shape)
   doc.setFillColor(0, 0, 0);
   const iconCenterX = pageWidth / 2;
   const iconCenterY = yPos;
   const iconSize = 8;
   
-  // Draw diamond shape
+  // Draw diamond shape using two triangles
   doc.setDrawColor(255, 255, 255);
   doc.setLineWidth(0.8);
   doc.setFillColor(0, 0, 0);
   
-  // Diamond points
+  // Define diamond corner points
   const diamondPath = [
-    [iconCenterX, iconCenterY - iconSize / 2],
-    [iconCenterX + iconSize / 2, iconCenterY],
-    [iconCenterX, iconCenterY + iconSize / 2],
-    [iconCenterX - iconSize / 2, iconCenterY]
+    [iconCenterX, iconCenterY - iconSize / 2],  // Top
+    [iconCenterX + iconSize / 2, iconCenterY],  // Right
+    [iconCenterX, iconCenterY + iconSize / 2],  // Bottom
+    [iconCenterX - iconSize / 2, iconCenterY]   // Left
   ];
   
+  // Fill diamond with black using two triangles
   doc.setFillColor(0, 0, 0);
   doc.triangle(
     diamondPath[0][0], diamondPath[0][1],
@@ -74,14 +102,14 @@ export function generateReceiptPDF(data: ReceiptData) {
   
   yPos += 12;
 
-  // Master-Fees heading
+  // Master-Fees heading - Large bold text
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(32);
   doc.setFont('helvetica', 'bold');
   doc.text('Master-Fees', pageWidth / 2, yPos, { align: 'center' });
   yPos += 10;
 
-  // School name
+  // School name - Medium text
   doc.setFontSize(16);
   doc.setFont('helvetica', 'normal');
   doc.text(schoolName, pageWidth / 2, yPos, { align: 'center' });
@@ -105,7 +133,9 @@ export function generateReceiptPDF(data: ReceiptData) {
   doc.line(leftMargin, yPos, rightMargin, yPos);
   yPos += 10;
 
-  // Payment Details - Two column layout
+  // === PAYMENT DETAILS SECTION ===
+  // Two column layout: Labels on left, values on right
+  
   doc.setFontSize(11);
   doc.setTextColor(0, 0, 0);
   const labelX = leftMargin;
@@ -139,21 +169,23 @@ export function generateReceiptPDF(data: ReceiptData) {
   doc.text('Parent', valueX, yPos, { align: 'right' });
   yPos += 10;
 
-  // Schedule ID (left aligned only)
+  // Schedule ID
   doc.setFont('helvetica', 'normal');
   doc.text('Schedule ID', labelX, yPos);
   doc.setFont('helvetica', 'bold');
   doc.text(scheduleId, valueX, yPos, { align: 'right' });
   yPos += 8;
 
-  // Service Fee (left aligned only)
+  // Service Fee (2% of total)
   doc.setFont('helvetica', 'normal');
   doc.text('Service Fee', labelX, yPos);
   doc.setFont('helvetica', 'bold');
   doc.text(`ZMW ${serviceFee.toFixed(2)}`, valueX, yPos, { align: 'right' });
   yPos += 15;
 
-  // Services Breakdown heading
+  // === SERVICES BREAKDOWN SECTION ===
+  
+  // Services heading
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
   doc.text('Services Breakdown', pageWidth / 2, yPos, { align: 'center' });
@@ -172,26 +204,26 @@ export function generateReceiptPDF(data: ReceiptData) {
   doc.text('Amount', rightMargin - 3, yPos, { align: 'right' });
   yPos += 12;
 
-  // Services List - Black text on white background
+  // Services List - Display each service in the table
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   
   services.forEach((service) => {
-    // Description
+    // Truncate description if too long
     const descText = service.description.length > 25 
       ? service.description.substring(0, 25) + '...' 
       : service.description;
     doc.text(descText, leftMargin + 3, yPos);
     
-    // Student - Invoice
+    // Student name with invoice number
     const studentText = `${service.studentName} - ${service.invoiceNo}`;
     const truncatedStudent = studentText.length > 40
       ? studentText.substring(0, 40) + '...'
       : studentText;
     doc.text(truncatedStudent, leftMargin + 65, yPos);
     
-    // Amount
+    // Amount in bold
     doc.setFont('helvetica', 'bold');
     doc.text(`K${service.amount.toFixed(2)}`, rightMargin - 3, yPos, { align: 'right' });
     doc.setFont('helvetica', 'normal');
@@ -206,10 +238,12 @@ export function generateReceiptPDF(data: ReceiptData) {
   doc.setDrawColor(0, 54, 48);
   doc.setLineWidth(0.5);
   doc.line(leftMargin, yPos, rightMargin, yPos);
-  doc.setLineDash([]);
+  doc.setLineDash([]);  // Reset to solid line
   yPos += 10;
 
-  // Total Payment
+  // === TOTAL SECTION ===
+  
+  // Total Payment - Large and bold
   doc.setFontSize(13);
   doc.setFont('helvetica', 'normal');
   doc.text('Total Payment', leftMargin, yPos);
@@ -218,20 +252,22 @@ export function generateReceiptPDF(data: ReceiptData) {
   doc.text(`ZMW ${totalWithFee.toFixed(2)}`, rightMargin, yPos, { align: 'right' });
   yPos += 15;
 
+  // === FOOTER SECTION ===
+  
   // Thank you message
   doc.setFontSize(13);
   doc.setFont('helvetica', 'bold');
   doc.text('Thank you for your payment!', pageWidth / 2, yPos, { align: 'center' });
   yPos += 7;
 
-  // Disclaimer
+  // Legal disclaimer
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(80, 80, 80);
   doc.text('This is a computer-generated receipt and does not require a signature', 
     pageWidth / 2, yPos, { align: 'center', maxWidth: contentWidth });
 
-  // Save the PDF
+  // Save the PDF with timestamp in filename
   const fileName = `Receipt_${refNumber}_${Date.now()}.pdf`;
   doc.save(fileName);
 }

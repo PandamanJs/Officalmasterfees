@@ -943,6 +943,10 @@
     display: inline-grid;
   }
 
+  .table {
+    display: table;
+  }
+
   .size-\[14px\] {
     width: 14px;
     height: 14px;

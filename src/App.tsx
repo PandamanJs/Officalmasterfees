@@ -17,12 +17,16 @@ import Tutorial from "./components/Tutorial";
 import { Toaster } from "./components/ui/sonner";
 import { getStudentsByPhone } from "./data/students";
 
+/**
+ * Interface for checkout service items
+ * Represents a single service being purchased for a student
+ */
 interface CheckoutService {
-  id: string;
-  description: string;
-  amount: number;
-  invoiceNo: string;
-  studentName: string;
+  id: string;           // Unique identifier for the service
+  description: string;  // Service name/description
+  amount: number;       // Cost in local currency
+  invoiceNo: string;    // Invoice reference number
+  studentName: string;  // Student receiving the service
 }
 
 // Mock schools data - in a real app, this would come from an API
@@ -30,6 +34,10 @@ const SCHOOLS = [
   { id: 1, name: "Twalumbu Educational Center" },
 ];
 
+/**
+ * SearchNormal Component
+ * SVG icon for the search functionality
+ */
 function SearchNormal() {
   return (
     <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 20 20">
@@ -42,6 +50,10 @@ function SearchNormal() {
   );
 }
 
+/**
+ * VuesaxLinearSearchNormal Component
+ * Wrapper for the search icon
+ */
 function VuesaxLinearSearchNormal() {
   return (
     <div className="absolute contents inset-0" data-name="vuesax/linear/search-normal">
@@ -50,20 +62,28 @@ function VuesaxLinearSearchNormal() {
   );
 }
 
+/**
+ * TextInput Component
+ * School search input with auto-suggest dropdown
+ * Features:
+ * - Real-time search filtering
+ * - Click-outside to close suggestions
+ * - Keyboard navigation support
+ */
 function TextInput({ onSchoolSelect, selectedSchool }: { onSchoolSelect: (school: string) => void; selectedSchool: string | null }) {
   const [inputValue, setInputValue] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Filter schools based on input
+  // Filter schools based on input - case insensitive search
   const filteredSchools = inputValue.trim()
     ? SCHOOLS.filter((school) =>
         school.name.toLowerCase().includes(inputValue.toLowerCase())
       )
     : [];
 
-  // Close suggestions when clicking outside
+  // Close suggestions when clicking outside the component
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -78,6 +98,10 @@ function TextInput({ onSchoolSelect, selectedSchool }: { onSchoolSelect: (school
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  /**
+   * Handle input changes
+   * Updates input value and shows/hides suggestions
+   */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInputValue(value);
@@ -87,6 +111,10 @@ function TextInput({ onSchoolSelect, selectedSchool }: { onSchoolSelect: (school
     }
   };
 
+  /**
+   * Handle school selection from dropdown
+   * Updates input, notifies parent, and closes dropdown
+   */
   const handleSelectSchool = (schoolName: string) => {
     setInputValue(schoolName);
     onSchoolSelect(schoolName);
