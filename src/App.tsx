@@ -13,6 +13,7 @@ import ProcessingPage from "./components/ProcessingPage";
 import PaymentFailedPage from "./components/PaymentFailedPage";
 import PaymentSuccessPage from "./components/PaymentSuccessPage";
 import DownloadReceiptPage from "./components/DownloadReceiptPage";
+import Tutorial from "./components/Tutorial";
 import { Toaster } from "./components/ui/sonner";
 import { getStudentsByPhone } from "./data/students";
 
@@ -482,6 +483,20 @@ export default function Page() {
   const [checkoutServices, setCheckoutServices] = useState<CheckoutService[]>([]);
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const [navigationDirection, setNavigationDirection] = useState<'forward' | 'back'>('forward');
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  // Check if user has seen tutorial on mount
+  useEffect(() => {
+    const hasSeenTutorial = localStorage.getItem('hasSeenTutorial');
+    if (!hasSeenTutorial) {
+      setShowTutorial(true);
+    }
+  }, []);
+
+  const handleTutorialComplete = () => {
+    localStorage.setItem('hasSeenTutorial', 'true');
+    setShowTutorial(false);
+  };
 
   // Navigation helper to push to history and update page
   const navigateToPage = (page: typeof currentPage, replaceHistory = false) => {
@@ -918,6 +933,7 @@ export default function Page() {
         )}
       </AnimatePresence>
       <Toaster />
+      {showTutorial && <Tutorial onComplete={handleTutorialComplete} />}
     </>
   );
 }
