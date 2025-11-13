@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import svgPaths from "../imports/svg-4boykq1z8d";
 import checkoutSvgPaths from "../imports/svg-qndngnuysv";
@@ -15,7 +16,7 @@ interface Service {
 interface CheckoutPageProps {
   services: Service[];
   onBack: () => void;
-  onProceed: (amount: number) => void;
+  onProceed: (amount: number, services: Service[]) => void;
 }
 
 function Header({ onBack }: { onBack: () => void }) {
@@ -277,7 +278,7 @@ export default function CheckoutPage({ services, onBack, onProceed }: CheckoutPa
     return (
       <ReceiptsPage 
         onBack={() => setShowReceipts(false)}
-        onNext={() => onProceed(finalAmount)}
+        onNext={() => onProceed(finalAmount, services)}
         totalAmount={finalAmount}
       />
     );
