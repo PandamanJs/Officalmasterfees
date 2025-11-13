@@ -4,7 +4,7 @@ import { getStudentsByPhone } from "../data/students";
 import svgPaths from "../imports/svg-4boykq1z8d";
 import dropdownSvgPaths from "../imports/svg-g5tpckf1cs";
 import checkSvgPaths from "../imports/svg-ntb0im3s1u";
-import xIconSvgPaths from "../imports/svg-oodjvrqllt";
+import xIconSvgPaths from "../imports/svg-zhcira9im7";
 import AddOtherServicesPopup from "./AddOtherServicesPopup";
 
 interface Student {
@@ -139,17 +139,15 @@ function XIcon({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="overflow-clip size-[14px] cursor-pointer touch-manipulation active:opacity-60 transition-opacity"
+      className="size-[14px] cursor-pointer touch-manipulation active:opacity-60 transition-opacity"
       data-name="icon-x"
       aria-label="Remove service"
     >
-      <div className="absolute inset-[20.833%]" data-name="Shape">
-        <div className="absolute inset-0" style={{ "--fill-0": "rgba(255, 0, 0, 1)" } as React.CSSProperties}>
-          <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 9 9">
-            <path d={xIconSvgPaths.p32e14a00} fill="var(--fill-0, #FF0000)" id="Shape" />
-          </svg>
-        </div>
-      </div>
+      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 14 14">
+        <g id="icon-x">
+          <path d={xIconSvgPaths.p1edcdf00} fill="var(--fill-0, #FF0000)" id="Shape" />
+        </g>
+      </svg>
     </button>
   );
 }
@@ -492,7 +490,7 @@ export default function AddServicesPage({ selectedStudentIds, userPhone, onBack,
     
     const newServices: Service[] = [];
     
-    // Parse the service name and price
+    // Parse the service name and price - skip if "None" is selected
     let description = "";
     let amount = 0;
     
@@ -507,7 +505,7 @@ export default function AddServicesPage({ selectedStudentIds, userPhone, onBack,
       amount = 1800;
     }
     
-    // Add bus service if valid
+    // Add bus service if valid (not "None")
     if (description && amount > 0) {
       newServices.push({
         id: `service-${Date.now()}`,
@@ -517,7 +515,7 @@ export default function AddServicesPage({ selectedStudentIds, userPhone, onBack,
       });
     }
     
-    // Also add canteen if selected
+    // Also add canteen if selected (not "None")
     if (option.includes("lunch")) {
       newServices.push({
         id: `service-${Date.now()}-canteen`,

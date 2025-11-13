@@ -8,12 +8,14 @@ interface AddOtherServicesPopupProps {
 }
 
 const BUS_OPTIONS = [
+  { label: "None", value: "none" },
   { label: "woodlands - K1,500 (Per month)", value: "woodlands-1500" },
   { label: "northmead - K1,200 (Per month)", value: "northmead-1200" },
   { label: "longacres - K1,800 (Per month)", value: "longacres-1800" },
 ];
 
 const CANTEEN_OPTIONS = [
+  { label: "None", value: "none" },
   { label: "Lunch - K1000 (Per month)", value: "lunch-1000" },
   { label: "Breakfast - K500 (Per month)", value: "breakfast-500" },
   { label: "Snacks - K300 (Per month)", value: "snacks-300" },
