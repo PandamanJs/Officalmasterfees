@@ -31,7 +31,10 @@ interface CheckoutService {
 
 // Mock schools data - in a real app, this would come from an API
 const SCHOOLS = [
-  { id: 1, name: "Twalumbu Educational Center" },
+  { 
+    id: 1, 
+    name: "Twalumbu Educational Center",
+  },
 ];
 
 /**
