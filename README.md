@@ -1,11 +1,33 @@
+# Master-Fees101
 
-  # Master-Fees101
+A web application for managing school fees.
 
-  This is a code bundle for Master-Fees101. The original project is available at https://www.figma.com/design/NKdZxjcl3HYILSggARkEnJ/Master-Fees101.
+## Tech Stack
 
-  ## Running the code
+*   **Frontend:**
+    *   React
+    *   Vite
+    *   Tailwind CSS
+    *   Radix UI
+    *   Lucide React
+    *   Framer Motion
+    *   Sonner
+    *   jsPDF
+*   **Backend & Deployment:**
+    *   Firebase
+    *   Supabase
+    *   Hono
 
-  Run `npm i` to install the dependencies.
+## Dependencies
 
-  Run `npm run dev` to start the development server.
-  
+To install the required dependencies, run the following command:
+
+```bash
+npm install
+```
+
+This will install all the necessary packages listed in the `package.json` file.
+
+## Author
+
+Charley Louis Siwale
