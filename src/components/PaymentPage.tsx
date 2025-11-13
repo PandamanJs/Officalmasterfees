@@ -7,6 +7,12 @@ import imgMastercardLogo from "figma:asset/5f1f04717ce88a1f8a9d6faeee898c4b88ef2
 import ExpandedMobileMoney from "../imports/Frame1707478923";
 import ExpandedCardPayment from "../imports/Frame1707478923-18-800";
 
+// ⚠️ WARNING: For testing only! Move to backend for production
+const MONEYUNIFY_CONFIG = {
+  authId: '01K94QF837QS857HSPN561R22D', // Replace with your actual auth_id
+  apiUrl: 'https://api.moneyunify.one',
+};
+
 interface PaymentPageProps {
   onBack: () => void;
   onPay: () => void;

@@ -227,11 +227,11 @@ function DropdownIcon() {
 }
 
 const GRADE_OPTIONS = [
-  { label: "Grade 1 - K1,200 (Per term)", value: "grade-1", price: 1200 },
-  { label: "Grade 2 - K1,300 (Per term)", value: "grade-2", price: 1300 },
-  { label: "Grade 3 - K1,500 (Per term)", value: "grade-3", price: 1500 },
-  { label: "Grade 4 - K1,600 (Per term)", value: "grade-4", price: 1600 },
-  { label: "Grade 5 - K1,800 (Per term)", value: "grade-5", price: 1800 },
+  { label: "Grade 1 - K120 (Per term)", value: "grade-1", price: 120 },
+  { label: "Grade 2 - K130 (Per term)", value: "grade-2", price: 130 },
+  { label: "Grade 3 - K150 (Per term)", value: "grade-3", price: 150 },
+  { label: "Grade 4 - K160 (Per term)", value: "grade-4", price: 160 },
+  { label: "Grade 5 - K180 (Per term)", value: "grade-5", price: 180 },
 ];
 
 const YEAR_OPTIONS = ["2023", "2024", "2025", "2026"];
@@ -250,7 +250,7 @@ function AddSchoolFeesForm({ onDone }: { onDone: (grade: string, year: string, t
 
   const handleDone = () => {
     const grade = gradeOption?.label.split(" - ")[0] || "Grade 3";
-    onDone(grade, selectedYear, selectedTerm, gradeOption?.price || 1500);
+    onDone(grade, selectedYear, selectedTerm, gradeOption?.price || 150);
   };
 
   return (
@@ -498,13 +498,13 @@ export default function AddServicesPage({ selectedStudentIds, userPhone, onBack,
     
     if (serviceName.includes("woodlands")) {
       description = `School Bus (Woodlands) - ${month}`;
-      amount = 1500;
+      amount = 150;
     } else if (serviceName.includes("northmead")) {
       description = `School Bus (Northmead) - ${month}`;
-      amount = 1200;
+      amount = 120;
     } else if (serviceName.includes("longacres")) {
       description = `School Bus (Longacres) - ${month}`;
-      amount = 1800;
+      amount = 180;
     }
     
     // Add bus service if valid
@@ -522,7 +522,7 @@ export default function AddServicesPage({ selectedStudentIds, userPhone, onBack,
       newServices.push({
         id: `service-${Date.now()}-canteen`,
         description: `Canteen (Lunch) - ${month}`,
-        amount: 1000,
+        amount: 100,
         invoiceNo: "202"
       });
     } else if (option.includes("breakfast")) {
