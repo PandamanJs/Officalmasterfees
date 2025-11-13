@@ -34,7 +34,6 @@ interface ReceiptData {
   dateTime: string;      // Payment date and time
   scheduleId: string;    // Schedule/transaction ID
   services?: CheckoutService[];  // List of services paid for
-  balance: number;
 }
 
 /**
@@ -44,7 +43,7 @@ interface ReceiptData {
  * @returns void - Saves PDF file directly to user's device
  */
 export function generateReceiptPDF(data: ReceiptData) {
-  const { schoolName, totalAmount, refNumber, dateTime, scheduleId, services = [], balance } = data;
+  const { schoolName, totalAmount, refNumber, dateTime, scheduleId, services = [] } = data;
   
   // Create a new PDF document in portrait A4 format
   const doc = new jsPDF({
@@ -57,9 +56,7 @@ export function generateReceiptPDF(data: ReceiptData) {
   
   // Calculate service fee (2% of total)
   const serviceFee = totalAmount * 0.02;
-  const totalWithFee = totalAmount;
-  const remainingBalance = 1;
-
+  const totalWithFee = totalAmount + serviceFee;
 
   // Page layout configuration
   let yPos = 25;  // Current Y position for content
@@ -183,7 +180,7 @@ export function generateReceiptPDF(data: ReceiptData) {
   doc.setFont('helvetica', 'normal');
   doc.text('Service Fee', labelX, yPos);
   doc.setFont('helvetica', 'bold');
-  doc.text(`K${serviceFee.toFixed(2)}`, valueX, yPos, { align: 'right' });
+  doc.text(`ZMW ${serviceFee.toFixed(2)}`, valueX, yPos, { align: 'right' });
   yPos += 15;
 
   // === SERVICES BREAKDOWN SECTION ===
@@ -252,15 +249,8 @@ export function generateReceiptPDF(data: ReceiptData) {
   doc.text('Total Payment', leftMargin, yPos);
   
   doc.setFont('helvetica', 'bold');
-  doc.text(`K${totalWithFee.toFixed(2)}`, rightMargin, yPos, { align: 'right' });
-  yPos += 8;
-
-  doc.setFont('helvetica', 'normal');
-  doc.text('Remaining Balance', leftMargin, yPos);
-  doc.setFont('helvetica', 'bold');
-  doc.text(`K${remainingBalance.toFixed(2)}`, rightMargin, yPos, { align: 'right' });
+  doc.text(`ZMW ${totalWithFee.toFixed(2)}`, rightMargin, yPos, { align: 'right' });
   yPos += 15;
-
 
   // === FOOTER SECTION ===
   
