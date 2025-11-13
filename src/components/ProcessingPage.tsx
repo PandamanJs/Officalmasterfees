@@ -7,13 +7,12 @@ interface ProcessingPageProps {
 }
 
 export default function ProcessingPage({ onProcessingComplete }: ProcessingPageProps) {
-  // Simulate payment processing - after 3 seconds, randomly succeed or fail
+  // Simulate payment processing - after 35 seconds, always succeed
   useEffect(() => {
     const timer = setTimeout(() => {
-      // 70% chance of success, 30% chance of failure
-      const isSuccess = Math.random() > 0.3;
+      const isSuccess = true;
       onProcessingComplete(isSuccess);
-    }, 3000);
+    }, 35000);
     
     return () => clearTimeout(timer);
   }, [onProcessingComplete]);
