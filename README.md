@@ -1,6 +1,6 @@
 # Master-Fees101
 
-A web application for managing school fees.
+A web application for paying school fees.
 
 ## Tech Stack
 
