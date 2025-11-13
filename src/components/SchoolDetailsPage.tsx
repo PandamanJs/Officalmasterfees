@@ -4,6 +4,7 @@ import svgPaths from "../imports/svg-cw21sj30t4";
 import headerSvgPaths from "../imports/svg-co0ktog99f";
 import { toast } from "sonner@2.0.3";
 import { ChevronDown } from "lucide-react";
+import imgTecLogo from "figma:asset/ec5fcf89fe0a77803b7cefd4250b03424564bb63.png";
 
 interface SchoolDetailsPageProps {
   schoolName: string;
@@ -11,7 +12,14 @@ interface SchoolDetailsPageProps {
   onBack: () => void;
 }
 
-function Logo() {
+// School logo configuration - matches schools from App.tsx
+const SCHOOL_LOGOS: Record<string, string> = {
+  "Twalumbu Educational Center": imgTecLogo,
+  // Add more schools here as needed
+};
+
+function Logo({ schoolName }: { schoolName: string }) {
+  const logoPath = SCHOOL_LOGOS[schoolName];
   return (
     <div className="size-[31px]">
       <div className="relative size-full">
@@ -46,12 +54,12 @@ function Logo() {
   );
 }
 
-function Header({ onBack }: { onBack: () => void }) {
+function Header({ onBack, schoolName }: { onBack: () => void; schoolName: string }) {
   return (
     <div className="h-[66px] w-full relative">
       <div aria-hidden="true" className="absolute border-[#e6e6e6] border-[0px_0px_1px] border-solid inset-0 pointer-events-none" />
       <div className="absolute left-[94px] top-[17px] flex items-center gap-[16px]">
-        <Logo />
+        <Logo schoolName={schoolName} />
         <p className="font-['IBM_Plex_Sans_Devanagari:Bold',sans-serif] leading-[normal] not-italic text-[20px] text-black text-nowrap whitespace-pre">master-fees</p>
       </div>
     </div>
@@ -59,13 +67,44 @@ function Header({ onBack }: { onBack: () => void }) {
 }
 
 function SchoolTitle({ schoolName }: { schoolName: string }) {
+  const logoPath = SCHOOL_LOGOS[schoolName];
+  
   return (
-    <div className="absolute left-1/2 top-[228px] translate-x-[-50%] w-full px-[24px]">
-      <div className="flex flex-col gap-[10px] items-center justify-center">
-        <div className="font-['Inter:Regular',sans-serif] font-normal leading-[28px] not-italic text-[0px] text-black text-center w-[286px]">
+    <div className="absolute left-1/2 top-[120px] translate-x-[-50%] w-full px-[24px]">
+      <div className="flex flex-col gap-[16px] items-center justify-center">
+        {/* Dynamic School Logo */}
+        {logoPath && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="flex justify-center items-center"
+            data-name="School Logo"
+          >
+            <div className="box-border content-stretch flex gap-[8px] h-[80px] items-center justify-center px-[10px] py-[10px] w-[136px]">
+              <div className="h-[126px] relative shrink-0 w-[115px]">
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <img 
+                    alt={`${schoolName} Logo`} 
+                    className="absolute h-[100.61%] left-[-15.25%] max-w-none top-[-0.31%] w-[285.53%] object-contain" 
+                    src={logoPath} 
+                  />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+        
+        {/* School Name Text */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="font-['Inter:Regular',sans-serif] font-normal leading-[28px] not-italic text-[0px] text-black text-center w-full max-w-[286px]"
+        >
           <p className="font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] mb-0 text-[12px]">Pay School fees for</p>
           <p className="font-['IBM_Plex_Sans_Devanagari:Bold',sans-serif] text-[24px]">{schoolName}</p>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
@@ -396,7 +435,7 @@ export default function SchoolDetailsPage({ schoolName, onProceed, onBack }: Sch
   return (
     <div className="bg-white min-h-screen w-full flex justify-center">
       <div className="bg-white relative w-full max-w-[393px] md:max-w-[500px] lg:max-w-[600px] h-screen overflow-hidden" data-name="Page 1">
-        <Header onBack={onBack} />
+        <Header onBack={onBack} schoolName={schoolName} />
         <SchoolTitle schoolName={schoolName} />
         <InputSection onValidationChange={handleValidationChange} />
         <ProceedButton onClick={handleProceedClick} disabled={!isPhoneValid} />
