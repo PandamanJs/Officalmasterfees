@@ -344,18 +344,18 @@ export default function PayForSchoolFees({
   };
 
   return (
-    <div className="bg-white min-h-screen w-full flex items-center justify-center" data-name="Pay for school fees page 1">
-      <div className="relative w-full max-w-[393px] md:max-w-[500px] lg:max-w-[600px] h-screen mx-auto bg-white flex flex-col overflow-hidden">
+    <div className="bg-white min-h-screen w-full overflow-hidden flex items-center justify-center" data-name="Pay for school fees page 1">
+      <div className="relative w-full max-w-[393px] md:max-w-[500px] lg:max-w-[600px] h-screen mx-auto bg-white flex flex-col">
         {/* Header - Fixed height */}
         <div className="flex-shrink-0">
           <Header onBack={onBack} />
         </div>
         
         {/* Content - Scrollable area */}
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <div className="flex-1 flex flex-col min-h-0 relative">
           {/* Title and Instructions */}
-          <div className="flex-shrink-0 px-[28px] sm:px-[40px] pt-[16px] pb-[20px]">
-            <div className="font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] leading-[1.3] not-italic text-[18px] text-black tracking-[-0.18px] mb-[12px]">
+          <div className="flex-shrink-0 px-[40px] pt-[16px] pb-[24px]">
+            <div className="font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] leading-[1.3] not-italic text-[18px] text-black tracking-[-0.18px] mb-[16px]">
               <p className="mb-[4px]">Choose the account(s) you want to</p>
               <p>pay for.</p>
             </div>
@@ -365,19 +365,12 @@ export default function PayForSchoolFees({
           </div>
 
           {/* Student Cards - Scrollable */}
-          <div 
-            className="flex-1 overflow-y-auto px-[28px] pb-[16px] space-y-[12px]" 
-            style={{ 
-              WebkitOverflowScrolling: 'touch',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none'
-            }}
-          >
+          <div className="flex-1 overflow-y-auto px-[28px] pb-[20px] space-y-[12px]" style={{ WebkitOverflowScrolling: 'touch' }}>
             {students.map((student) => (
               <button
                 key={student.id}
                 onClick={() => toggleStudent(student.id)}
-                className={`bg-neutral-100 box-border content-stretch flex gap-[9px] min-h-[77px] items-center w-full overflow-clip p-[20px] rounded-[12px] touch-manipulation transition-colors ${
+                className={`bg-neutral-100 box-border content-stretch flex gap-[9px] h-[77px] items-center w-full overflow-clip p-[20px] rounded-[12px] touch-manipulation transition-colors ${
                   selectedStudents.includes(student.id)
                     ? 'border border-[#d9d9d9] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]' 
                     : 'hover:bg-neutral-200 active:bg-neutral-300'
@@ -395,10 +388,7 @@ export default function PayForSchoolFees({
           </div>
 
           {/* Button - Fixed at bottom with safe area */}
-          <div 
-            className="flex-shrink-0 px-[28px] sm:px-[36px] pb-[20px] pt-[16px] bg-white border-t border-transparent" 
-            style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom))' }}
-          >
+          <div className="flex-shrink-0 px-[36px] pb-[20px] pt-[16px] bg-white" style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom))' }}>
             <button 
               onClick={handleSelectServices}
               disabled={selectedStudents.length === 0}
