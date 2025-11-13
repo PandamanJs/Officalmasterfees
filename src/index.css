@@ -587,20 +587,8 @@
     top: 587.77px;
   }
 
-  .top-\[608\.19px\] {
-    top: 608.19px;
-  }
-
   .top-\[683\.17px\] {
     top: 683.17px;
-  }
-
-  .top-\[701\.19px\] {
-    top: 701.19px;
-  }
-
-  .top-\[718\.29px\] {
-    top: 718.29px;
   }
 
   .top-\[734\.24px\] {
@@ -661,6 +649,18 @@
 
   .bottom-\[-22\.63\%\] {
     bottom: -22.63%;
+  }
+
+  .bottom-\[60px\] {
+    bottom: 60px;
+  }
+
+  .bottom-\[80px\] {
+    bottom: 80px;
+  }
+
+  .bottom-\[180px\] {
+    bottom: 180px;
   }
 
   .left-0 {

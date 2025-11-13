@@ -61,7 +61,7 @@ function DecorativeShapes() {
   return (
     <>
       <motion.div 
-        className="absolute flex h-[calc(1px*((var(--transform-inner-width)*0.6322111487388611)+(var(--transform-inner-height)*0.7254649996757507)))] items-center justify-center left-[31.14px] top-[701.19px] w-[calc(1px*((var(--transform-inner-height)*0.6882590651512146)+(var(--transform-inner-width)*0.7747961282730103)))]" 
+        className="absolute flex h-[calc(1px*((var(--transform-inner-width)*0.6322111487388611)+(var(--transform-inner-height)*0.7254649996757507)))] items-center justify-center left-[31.14px] bottom-[80px] w-[calc(1px*((var(--transform-inner-height)*0.6882590651512146)+(var(--transform-inner-width)*0.7747961282730103)))]" 
         style={{ "--transform-inner-width": "122.546875", "--transform-inner-height": "60.953125" } as React.CSSProperties}
         initial={{ opacity: 0 }}
         animate={{
@@ -99,7 +99,7 @@ function DecorativeShapes() {
       </motion.div>
       
       <motion.div 
-        className="absolute flex h-[calc(1px*((var(--transform-inner-width)*0.6322111487388611)+(var(--transform-inner-height)*0.7254649996757507)))] items-center justify-center left-[51.54px] top-[608.19px] w-[calc(1px*((var(--transform-inner-height)*0.6882590651512146)+(var(--transform-inner-width)*0.7747961282730103)))]" 
+        className="absolute flex h-[calc(1px*((var(--transform-inner-width)*0.6322111487388611)+(var(--transform-inner-height)*0.7254649996757507)))] items-center justify-center left-[51.54px] bottom-[180px] w-[calc(1px*((var(--transform-inner-height)*0.6882590651512146)+(var(--transform-inner-width)*0.7747961282730103)))]" 
         style={{ "--transform-inner-width": "158.96875", "--transform-inner-height": "97.015625" } as React.CSSProperties}
         initial={{ opacity: 0 }}
         animate={{
@@ -137,7 +137,7 @@ function DecorativeShapes() {
       </motion.div>
       
       <motion.div 
-        className="absolute flex h-[calc(1px*((var(--transform-inner-width)*0.6322111487388611)+(var(--transform-inner-height)*0.7254649996757507)))] items-center justify-center left-[245.89px] top-[718.29px] w-[calc(1px*((var(--transform-inner-height)*0.6882590651512146)+(var(--transform-inner-width)*0.7747961282730103)))]" 
+        className="absolute flex h-[calc(1px*((var(--transform-inner-width)*0.6322111487388611)+(var(--transform-inner-height)*0.7254649996757507)))] items-center justify-center left-[245.89px] bottom-[60px] w-[calc(1px*((var(--transform-inner-height)*0.6882590651512146)+(var(--transform-inner-width)*0.7747961282730103)))]" 
         style={{ "--transform-inner-width": "122.546875", "--transform-inner-height": "60.953125" } as React.CSSProperties}
         initial={{ opacity: 0 }}
         animate={{
