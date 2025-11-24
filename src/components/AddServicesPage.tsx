@@ -17,6 +17,7 @@ interface Student {
 interface AddServicesPageProps {
   selectedStudentIds: string[];
   userPhone: string;
+  schoolName: string;
   onBack: () => void;
   onNext: () => void;
   onCheckout?: (services: Array<Service & { studentName: string }>) => void;
@@ -235,234 +236,232 @@ function DropdownIcon() {
   );
 }
 
-const GRADE_OPTIONS = [
-  { label: "Grade 1 - K1,200 (Per term)", value: "grade-1", price: 1200 },
-  { label: "Grade 2 - K1,300 (Per term)", value: "grade-2", price: 1300 },
-  { label: "Grade 3 - K1,500 (Per term)", value: "grade-3", price: 1500 },
-  { label: "Grade 4 - K1,600 (Per term)", value: "grade-4", price: 1600 },
-  { label: "Grade 5 - K1,800 (Per term)", value: "grade-5", price: 1800 },
-];
-
 const YEAR_OPTIONS = ["2023", "2024", "2025", "2026"];
 
 const TERM_OPTIONS = ["Term 1", "Term 2", "Term 3"];
 
-function AddSchoolFeesForm({ onDone }: { onDone: (grade: string, year: string, term: string, price: number) => void }) {
+/**
+ * Get school-specific grade pricing
+ * Different schools have different tuition structures
+ */
+function getSchoolGradePricing(schoolName: string) {
+  const pricingBySchool: Record<string, Array<{ label: string; value: string; price: number }>> = {
+    "Twalumbu Educational Center": [
+      { label: "Grade 1 - K800 (Per term)", value: "grade-1", price: 800 },
+      { label: "Grade 2 - K900 (Per term)", value: "grade-2", price: 900 },
+      { label: "Grade 3 - K1,000 (Per term)", value: "grade-3", price: 1000 },
+      { label: "Grade 4 - K1,100 (Per term)", value: "grade-4", price: 1100 },
+      { label: "Grade 5 - K1,200 (Per term)", value: "grade-5", price: 1200 },
+      { label: "Grade 6 - K1,300 (Per term)", value: "grade-6", price: 1300 },
+      { label: "Grade 7 - K1,400 (Per term)", value: "grade-7", price: 1400 },
+    ],
+    "Chimilute Trust Academy": [
+      { label: "Form 1 - K2,200 (Per term)", value: "form-1", price: 2200 },
+      { label: "Form 2 - K2,400 (Per term)", value: "form-2", price: 2400 },
+      { label: "Form 3 - K2,600 (Per term)", value: "form-3", price: 2600 },
+      { label: "Form 4 - K2,800 (Per term)", value: "form-4", price: 2800 },
+      { label: "Form 5 - K3,000 (Per term)", value: "form-5", price: 3000 },
+    ],
+    "Julani School": [
+      { label: "Grade 1 - K2,800 (Per term)", value: "grade-1", price: 2800 },
+      { label: "Grade 2 - K3,000 (Per term)", value: "grade-2", price: 3000 },
+      { label: "Grade 3 - K3,200 (Per term)", value: "grade-3", price: 3200 },
+      { label: "Grade 4 - K3,500 (Per term)", value: "grade-4", price: 3500 },
+      { label: "Grade 5 - K3,800 (Per term)", value: "grade-5", price: 3800 },
+      { label: "Grade 6 - K4,000 (Per term)", value: "grade-6", price: 4000 },
+    ],
+    "Crested Crane Academy": [
+      { label: "Year 5 - K3,800 (Per term)", value: "year-5", price: 3800 },
+      { label: "Year 6 - K4,000 (Per term)", value: "year-6", price: 4000 },
+      { label: "Year 7 - K4,200 (Per term)", value: "year-7", price: 4200 },
+      { label: "Year 8 - K4,500 (Per term)", value: "year-8", price: 4500 },
+      { label: "Year 9 - K4,800 (Per term)", value: "year-9", price: 4800 },
+      { label: "Year 10 - K5,000 (Per term)", value: "year-10", price: 5000 },
+      { label: "Year 11 - K5,500 (Per term)", value: "year-11", price: 5500 },
+    ],
+    "International Maarif School": [
+      { label: "Grade 6 - K4,500 (Per term)", value: "grade-6", price: 4500 },
+      { label: "Grade 7 - K4,800 (Per term)", value: "grade-7", price: 4800 },
+      { label: "Grade 8 - K5,000 (Per term)", value: "grade-8", price: 5000 },
+      { label: "Grade 9 - K5,500 (Per term)", value: "grade-9", price: 5500 },
+      { label: "Grade 10 - K6,000 (Per term)", value: "grade-10", price: 6000 },
+      { label: "Grade 11 - K6,500 (Per term)", value: "grade-11", price: 6500 },
+      { label: "Grade 12 - K7,000 (Per term)", value: "grade-12", price: 7000 },
+    ],
+  };
+
+  return pricingBySchool[schoolName] || pricingBySchool["Twalumbu Educational Center"];
+}
+
+function AddSchoolFeesForm({ onDone, schoolName }: { onDone: (grade: string, year: string, term: string, price: number) => void; schoolName: string }) {
+  const GRADE_OPTIONS = getSchoolGradePricing(schoolName);
   const [selectedGrade, setSelectedGrade] = useState(GRADE_OPTIONS[2].value);
   const [selectedYear, setSelectedYear] = useState("2025");
   const [selectedTerm, setSelectedTerm] = useState("Term 1");
-  const [showGradeDropdown, setShowGradeDropdown] = useState(false);
-  const [showYearDropdown, setShowYearDropdown] = useState(false);
-  const [showTermDropdown, setShowTermDropdown] = useState(false);
-
-  const gradeOption = GRADE_OPTIONS.find(opt => opt.value === selectedGrade);
 
   const handleDone = () => {
-    const grade = gradeOption?.label.split(" - ")[0] || "Grade 3";
-    onDone(grade, selectedYear, selectedTerm, gradeOption?.price || 1500);
+    const gradeOption = GRADE_OPTIONS.find(opt => opt.value === selectedGrade);
+    if (gradeOption) {
+      onDone(gradeOption.label, selectedYear, selectedTerm, gradeOption.price);
+    }
   };
 
   return (
-    <div className="bg-white content-stretch flex flex-col gap-[10px] items-center overflow-clip relative rounded-[10px] w-full p-[12px] flex-1">
-      {/* Header */}
-      <div className="box-border content-stretch flex gap-[10px] items-start justify-center p-[6px] relative shrink-0">
-        <p className="font-['Inter:Regular',sans-serif] font-normal leading-[24px] not-italic relative shrink-0 text-[#003049] text-[12px] text-nowrap tracking-[-0.12px] whitespace-pre">+ Add School Fees</p>
-      </div>
-
-      {/* Select Grade */}
-      <div className="content-stretch flex gap-[5px] items-start relative shrink-0 w-full">
-        <div className="basis-0 content-stretch flex flex-col grow items-start min-h-px min-w-px relative shrink-0">
-          <div className="content-stretch flex gap-[10px] items-start relative shrink-0 w-full">
-            <p className="basis-0 font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] grow leading-[16px] min-h-px min-w-px not-italic relative shrink-0 text-[#2d3648] text-[8px] tracking-[-0.08px]">Select Grade</p>
-          </div>
-          <div className="relative w-full mt-1">
-            <button
-              onClick={() => setShowGradeDropdown(!showGradeDropdown)}
-              className="bg-white h-[36px] relative rounded-[6px] shrink-0 w-full touch-manipulation"
-            >
-              <div className="content-stretch flex flex-col h-[36px] items-start overflow-clip relative rounded-[inherit] w-full">
-                <div className="h-[36px] relative shrink-0 w-full">
-                  <div className="flex flex-row items-center size-full">
-                    <div className="box-border content-stretch flex gap-[8px] h-[36px] items-center pl-[16px] pr-[12px] py-[12px] relative w-full">
-                      <p className="basis-0 font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] grow leading-[1.5] min-h-px min-w-px not-italic relative shrink-0 text-[#2d3648] text-[12px] tracking-[-0.12px] text-left">{gradeOption?.label}</p>
-                      <DropdownIcon />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div aria-hidden="true" className="absolute border border-[#cbd2e0] border-solid inset-0 pointer-events-none rounded-[6px]" />
-            </button>
-            
-            {showGradeDropdown && (
-              <>
-                <div 
-                  className="fixed inset-0 z-40"
-                  onClick={() => setShowGradeDropdown(false)}
-                />
-                <motion.div
-                  className="absolute z-50 w-full mt-1 glass rounded-[12px] max-h-[200px] overflow-y-auto"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  style={{
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.6) inset'
-                  }}
-                >
-                  {GRADE_OPTIONS.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => {
-                        setSelectedGrade(option.value);
-                        setShowGradeDropdown(false);
-                      }}
-                      className="w-full text-left px-[16px] py-[8px] hover:bg-[#f5f5f5] transition-colors"
-                    >
-                      <p className="font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] text-[12px] text-[#2d3648] tracking-[-0.12px]">
-                        {option.label}
-                      </p>
-                    </button>
-                  ))}
-                </motion.div>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Enter Year of Service */}
-      <div className="content-stretch flex gap-[5px] items-start relative shrink-0 w-full">
-        <div className="basis-0 content-stretch flex flex-col grow items-start min-h-px min-w-px relative shrink-0">
-          <div className="content-stretch flex gap-[10px] items-start relative shrink-0 w-full">
-            <p className="basis-0 font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] grow leading-[16px] min-h-px min-w-px not-italic relative shrink-0 text-[#2d3648] text-[8px] tracking-[-0.08px]">Enter Year of Service</p>
-          </div>
-          <div className="relative w-full mt-1">
-            <button
-              onClick={() => setShowYearDropdown(!showYearDropdown)}
-              className="bg-white h-[36px] relative rounded-[6px] shrink-0 w-full touch-manipulation"
-            >
-              <div className="content-stretch flex flex-col h-[36px] items-start overflow-clip relative rounded-[inherit] w-full">
-                <div className="h-[36px] relative shrink-0 w-full">
-                  <div className="flex flex-row items-center size-full">
-                    <div className="box-border content-stretch flex gap-[8px] h-[36px] items-center pl-[16px] pr-[12px] py-[12px] relative w-full">
-                      <p className="basis-0 font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] grow leading-[1.5] min-h-px min-w-px not-italic relative shrink-0 text-[#2d3648] text-[12px] tracking-[-0.12px] text-left">{selectedYear}</p>
-                      <DropdownIcon />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div aria-hidden="true" className="absolute border border-[#cbd2e0] border-solid inset-0 pointer-events-none rounded-[6px]" />
-            </button>
-
-            {showYearDropdown && (
-              <>
-                <div 
-                  className="fixed inset-0 z-40"
-                  onClick={() => setShowYearDropdown(false)}
-                />
-                <motion.div
-                  className="absolute z-50 w-full mt-1 glass rounded-[12px] max-h-[200px] overflow-y-auto"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  style={{
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.6) inset'
-                  }}
-                >
-                  {YEAR_OPTIONS.map((year) => (
-                    <button
-                      key={year}
-                      onClick={() => {
-                        setSelectedYear(year);
-                        setShowYearDropdown(false);
-                      }}
-                      className="w-full text-left px-[16px] py-[8px] hover:bg-[#f5f5f5] transition-colors"
-                    >
-                      <p className="font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] text-[12px] text-[#2d3648] tracking-[-0.12px]">
-                        {year}
-                      </p>
-                    </button>
-                  ))}
-                </motion.div>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Select the Term */}
-      <div className="content-stretch flex gap-[5px] items-start relative shrink-0 w-full">
-        <div className="basis-0 content-stretch flex flex-col grow items-start min-h-px min-w-px relative shrink-0">
-          <div className="content-stretch flex gap-[10px] items-start relative shrink-0 w-full">
-            <p className="basis-0 font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] grow leading-[16px] min-h-px min-w-px not-italic relative shrink-0 text-[#2d3648] text-[8px] tracking-[-0.08px]">Select the Term (You can choose to pay for more than one term)</p>
-          </div>
-          <div className="relative w-full mt-1">
-            <button
-              onClick={() => setShowTermDropdown(!showTermDropdown)}
-              className="bg-white h-[36px] relative rounded-[6px] shrink-0 w-full touch-manipulation"
-            >
-              <div className="content-stretch flex flex-col h-[36px] items-start overflow-clip relative rounded-[inherit] w-full">
-                <div className="h-[36px] relative shrink-0 w-full">
-                  <div className="flex flex-row items-center size-full">
-                    <div className="box-border content-stretch flex gap-[8px] h-[36px] items-center pl-[16px] pr-[12px] py-[12px] relative w-full">
-                      <p className="basis-0 font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] grow leading-[1.5] min-h-px min-w-px not-italic relative shrink-0 text-[#2d3648] text-[12px] tracking-[-0.12px] text-left">{selectedTerm}</p>
-                      <DropdownIcon />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div aria-hidden="true" className="absolute border border-[#cbd2e0] border-solid inset-0 pointer-events-none rounded-[6px]" />
-            </button>
-
-            {showTermDropdown && (
-              <>
-                <div 
-                  className="fixed inset-0 z-40"
-                  onClick={() => setShowTermDropdown(false)}
-                />
-                <motion.div
-                  className="absolute z-50 w-full mt-1 glass rounded-[12px] max-h-[200px] overflow-y-auto"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  style={{
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.6) inset'
-                  }}
-                >
-                  {TERM_OPTIONS.map((term) => (
-                    <button
-                      key={term}
-                      onClick={() => {
-                        setSelectedTerm(term);
-                        setShowTermDropdown(false);
-                      }}
-                      className="w-full text-left px-[16px] py-[8px] hover:bg-[#f5f5f5] transition-colors"
-                    >
-                      <p className="font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] text-[12px] text-[#2d3648] tracking-[-0.12px]">
-                        {term}
-                      </p>
-                    </button>
-                  ))}
-                </motion.div>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Done Button */}
-      <div className="box-border content-stretch flex gap-[5px] h-[48px] items-center justify-end pl-0 pr-[24px] py-0 relative shrink-0 w-full">
-        <button 
-          onClick={handleDone}
-          className="bg-[#95e36c] box-border content-stretch flex gap-[10px] h-[48px] items-center justify-center px-[36px] py-0 relative rounded-[8px] shrink-0 flex-1 touch-manipulation active:scale-[0.98] transition-transform"
+    <>
+      {/* Backdrop with blur */}
+      <div className="fixed inset-0 bg-black/30 z-40 backdrop-blur-sm" />
+      
+      {/* Centered Form */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none p-[16px]">
+        <motion.div
+          className="bg-white rounded-[16px] shadow-[0px_20px_60px_rgba(0,54,48,0.25)] pointer-events-auto w-full max-w-[360px]"
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
         >
-          <p className="font-['IBM_Plex_Sans_Devanagari:SemiBold',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[#003630] text-[12px] text-nowrap whitespace-pre">Done</p>
+          <div className="p-[20px]">
+            {/* Header */}
+            <div className="mb-[24px]">
+              <p className="font-['IBM_Plex_Sans_Devanagari:Bold',sans-serif] text-[16px] text-[#003630] tracking-[-0.16px] mb-[4px]">
+                Add School Fees
+              </p>
+              <p className="font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] text-[11px] text-[#6b7280] tracking-[-0.11px]">
+                Select grade, year, and term
+              </p>
+            </div>
+
+            {/* Form Fields */}
+            <div className="space-y-[16px]">
+              <AppleDropdown
+                label="Grade/Form"
+                options={GRADE_OPTIONS}
+                value={selectedGrade}
+                onChange={setSelectedGrade}
+              />
+              
+              <AppleDropdown
+                label="Year"
+                options={YEAR_OPTIONS.map(y => ({ label: y, value: y }))}
+                value={selectedYear}
+                onChange={setSelectedYear}
+              />
+              
+              <AppleDropdown
+                label="Term"
+                options={TERM_OPTIONS.map(t => ({ label: t, value: t }))}
+                value={selectedTerm}
+                onChange={setSelectedTerm}
+              />
+            </div>
+
+            {/* Done Button */}
+            <button 
+              onClick={handleDone}
+              className="mt-[24px] bg-[#95e36c] w-full h-[48px] rounded-[12px] transition-all touch-manipulation active:scale-[0.98] shadow-[0px_4px_0px_0px_rgba(149,227,108,0.3)] active:shadow-[0px_1px_0px_0px_rgba(149,227,108,0.3)] active:translate-y-[3px]"
+            >
+              <p className="font-['IBM_Plex_Sans_Devanagari:SemiBold',sans-serif] text-[14px] text-[#003630] tracking-[-0.14px]">
+                Add Fee
+              </p>
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    </>
+  );
+}
+
+/**
+ * Apple-style Dropdown Component
+ * Premium dropdown with smooth animations
+ */
+function AppleDropdown({ 
+  label, 
+  options, 
+  value, 
+  onChange 
+}: { 
+  label: string; 
+  options: { label: string; value: string }[]; 
+  value: string; 
+  onChange: (value: string) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const selectedOption = options.find(opt => opt.value === value);
+
+  return (
+    <div className="w-full">
+      {/* Label */}
+      <p className="font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] text-[11px] text-[#6b7280] tracking-[-0.11px] mb-[8px] uppercase tracking-[0.5px]">
+        {label}
+      </p>
+      
+      {/* Dropdown Button */}
+      <div className="relative">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full h-[44px] bg-[#f5f5f7] hover:bg-[#ebebed] rounded-[10px] px-[16px] flex items-center justify-between transition-all touch-manipulation"
+        >
+          <p className="font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] text-[14px] text-[#1d1d1f] tracking-[-0.14px]">
+            {selectedOption?.label || "Select..."}
+          </p>
+          <motion.svg 
+            width="12" 
+            height="8" 
+            viewBox="0 0 12 8" 
+            fill="none"
+            animate={{ rotate: isOpen ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <path d="M1 1.5L6 6.5L11 1.5" stroke="#86868b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </motion.svg>
         </button>
+        
+        {/* Dropdown Menu */}
+        {isOpen && (
+          <>
+            <div 
+              className="fixed inset-0 z-40"
+              onClick={() => setIsOpen(false)}
+            />
+            <motion.div
+              className="absolute z-50 w-full mt-[8px] bg-white rounded-[12px] shadow-[0px_12px_40px_rgba(0,0,0,0.15)] overflow-hidden border border-[#e5e5e7]"
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
+              <div className="max-h-[240px] overflow-y-auto">
+                {options.map((option, index) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      onChange(option.value);
+                      setIsOpen(false);
+                    }}
+                    className={`w-full text-left px-[16px] py-[12px] transition-colors touch-manipulation ${
+                      option.value === value 
+                        ? 'bg-[#e0f7d4]' 
+                        : 'hover:bg-[#f5f5f7]'
+                    } ${index !== 0 ? 'border-t border-[#f5f5f7]' : ''}`}
+                  >
+                    <p className={`font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] text-[14px] tracking-[-0.14px] ${
+                      option.value === value ? 'text-[#003630] font-semibold' : 'text-[#1d1d1f]'
+                    }`}>
+                      {option.label}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </>
+        )}
       </div>
     </div>
   );
 }
 
-export default function AddServicesPage({ selectedStudentIds, userPhone, onBack, onNext, onCheckout }: AddServicesPageProps) {
+export default function AddServicesPage({ selectedStudentIds, userPhone, schoolName, onBack, onNext, onCheckout }: AddServicesPageProps) {
   const allStudents = getStudentsByPhone(userPhone);
   const selectedStudents = allStudents.filter(s => selectedStudentIds.includes(s.id));
   
@@ -505,61 +504,54 @@ export default function AddServicesPage({ selectedStudentIds, userPhone, onBack,
     setShowOtherServicesPopup(true);
   };
 
-  const handleOtherServicesDone = (serviceName: string, option: string, month: string) => {
+  const handleOtherServicesDone = (services: Array<{ id: string; name: string; amount: number; category: string; term: string; route?: string }>) => {
     setShowOtherServicesPopup(false);
     
-    const newServices: Service[] = [];
+    if (services.length === 0) return;
     
-    // Parse the service name and price - skip if "None" is selected
-    let description = "";
-    let amount = 0;
+    // Get existing services for the active student
+    const existingServices = studentServices[activeStudentId] || [];
     
-    if (serviceName.includes("woodlands")) {
-      description = `School Bus (Woodlands) - ${month}`;
-      amount = 1500;
-    } else if (serviceName.includes("northmead")) {
-      description = `School Bus (Northmead) - ${month}`;
-      amount = 1200;
-    } else if (serviceName.includes("longacres")) {
-      description = `School Bus (Longacres) - ${month}`;
-      amount = 1800;
-    }
-    
-    // Add bus service if valid (not "None")
-    if (description && amount > 0) {
-      newServices.push({
-        id: `service-${Date.now()}`,
-        description,
-        amount,
-        invoiceNo: "202"
+    // Convert the school services to the Service format, filtering out duplicates
+    const newServices: Service[] = services
+      .filter(service => {
+        // Create a signature for this service based on name, term, and route
+        const newSignature = `${service.name}-${service.term}${service.route ? `-${service.route}` : ''}`;
+        
+        // Check if a service with this signature already exists
+        const isDuplicate = existingServices.some(existing => {
+          // Extract the signature from the existing service description
+          return existing.description === (
+            service.name + 
+            (service.term ? ` - ${service.term}` : '') + 
+            (service.route ? ` (${service.route})` : '')
+          );
+        });
+        
+        return !isDuplicate;
+      })
+      .map((service, index) => {
+        // Build service description with term and route info
+        let description = service.name;
+        if (service.term) {
+          description += ` - ${service.term}`;
+        }
+        if (service.route) {
+          description += ` (${service.route})`;
+        }
+        
+        // Generate a unique ID by combining the service ID with term and route info
+        const uniqueId = `${service.id}-${service.term.replace(/\s+/g, '-')}-${service.route ? service.route.replace(/\s+/g, '-') : 'no-route'}-${Date.now()}-${index}`;
+        
+        return {
+          id: uniqueId,
+          description: description,
+          amount: service.amount,
+          invoiceNo: "202"
+        };
       });
-    }
     
-    // Also add canteen if selected (not "None")
-    if (option.includes("lunch")) {
-      newServices.push({
-        id: `service-${Date.now()}-canteen`,
-        description: `Canteen (Lunch) - ${month}`,
-        amount: 1000,
-        invoiceNo: "202"
-      });
-    } else if (option.includes("breakfast")) {
-      newServices.push({
-        id: `service-${Date.now()}-canteen`,
-        description: `Canteen (Breakfast) - ${month}`,
-        amount: 500,
-        invoiceNo: "202"
-      });
-    } else if (option.includes("snacks")) {
-      newServices.push({
-        id: `service-${Date.now()}-canteen`,
-        description: `Canteen (Snacks) - ${month}`,
-        amount: 300,
-        invoiceNo: "202"
-      });
-    }
-    
-    // Add all new services to the active student
+    // Only add if there are new services (not all duplicates)
     if (newServices.length > 0) {
       setStudentServices(prev => ({
         ...prev,
@@ -632,7 +624,7 @@ export default function AddServicesPage({ selectedStudentIds, userPhone, onBack,
 
             {/* Conditional Content */}
             {showAddFeesForm ? (
-              <AddSchoolFeesForm onDone={handleDone} />
+              <AddSchoolFeesForm onDone={handleDone} schoolName={schoolName} />
             ) : (
               <>
                 {/* Service Table */}
@@ -642,21 +634,21 @@ export default function AddServicesPage({ selectedStudentIds, userPhone, onBack,
 
                 {/* Add Buttons */}
                 {!showOtherServicesPopup && (
-                  <div className="w-full space-y-[12px]">
+                  <div className="w-full space-y-[12px] mt-[4px]">
                     <button 
                       onClick={handleAddSchoolFees}
-                      className="bg-[#95e36c] box-border content-stretch flex gap-[8px] h-[42px] items-center justify-center overflow-clip px-[24px] py-[10px] rounded-[10px] w-full touch-manipulation active:scale-[0.98] transition-transform"
+                      className="bg-[#95e36c] w-full h-[50px] rounded-[12px] transition-all touch-manipulation active:scale-[0.98] shadow-[0px_4px_0px_0px_rgba(149,227,108,0.3)] active:shadow-[0px_1px_0px_0px_rgba(149,227,108,0.3)] active:translate-y-[3px] hover:shadow-[0px_6px_0px_0px_rgba(149,227,108,0.3)] flex items-center justify-center"
                     >
-                      <p className="font-['IBM_Plex_Sans_Devanagari:SemiBold',sans-serif] leading-[24px] not-italic relative shrink-0 text-[#003630] text-[12px] text-nowrap tracking-[-0.12px] whitespace-pre">
+                      <p className="font-['IBM_Plex_Sans_Devanagari:SemiBold',sans-serif] text-[14px] text-[#003630] tracking-[-0.14px]">
                         + Add School Fees
                       </p>
                     </button>
                     
                     <button 
                       onClick={handleAddOtherServices}
-                      className="box-border content-stretch flex gap-[8px] h-[38px] items-center justify-center overflow-clip px-[24px] py-[10px] rounded-[6px] w-full touch-manipulation active:opacity-60 transition-opacity"
+                      className="w-full h-[44px] bg-[#f5f5f7] hover:bg-[#ebebed] rounded-[10px] transition-all touch-manipulation active:scale-[0.98] flex items-center justify-center border border-[#e5e5e7]"
                     >
-                      <p className="font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] leading-[24px] not-italic relative shrink-0 text-[#2d3c48] text-[12px] text-nowrap tracking-[-0.12px] whitespace-pre">
+                      <p className="font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] text-[14px] text-[#1d1d1f] tracking-[-0.14px]">
                         Add Other Services
                       </p>
                     </button>
@@ -701,6 +693,7 @@ export default function AddServicesPage({ selectedStudentIds, userPhone, onBack,
         {/* Add Other Services Popup */}
         {showOtherServicesPopup && (
           <AddOtherServicesPopup
+            schoolName={schoolName}
             onClose={() => setShowOtherServicesPopup(false)}
             onDone={handleOtherServicesDone}
           />

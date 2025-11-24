@@ -959,6 +959,7 @@ export default function Page() {
             <AddServicesPage
               selectedStudentIds={selectedStudentIds}
               userPhone={userPhone}
+              schoolName={selectedSchool || ""}
               onBack={handleBackToPayFees}
               onNext={handleNextFromAddServices}
               onCheckout={handleCheckout}

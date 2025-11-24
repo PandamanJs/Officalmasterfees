@@ -1,242 +1,387 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import svgPaths from "../imports/svg-rwvnsqykxb";
+import { getSchoolServices } from "../data/schoolData";
+import type { SchoolService } from "../data/schoolData";
 
 interface AddOtherServicesPopupProps {
   onClose: () => void;
-  onDone: (service: string, option: string, month: string) => void;
+  onDone: (services: Array<{ id: string; name: string; amount: number; category: string; term: string; route?: string }>) => void;
+  schoolName: string;
 }
 
-const BUS_OPTIONS = [
-  { label: "None", value: "none" },
-  { label: "woodlands - K1,500 (Per month)", value: "woodlands-1500" },
-  { label: "northmead - K1,200 (Per month)", value: "northmead-1200" },
-  { label: "longacres - K1,800 (Per month)", value: "longacres-1800" },
-];
+/**
+ * Bus routes available for each school
+ */
+const BUS_ROUTES: Record<string, string[]> = {
+  "Twalumbu Educational Center": ["Route A - Central", "Route B - East", "Route C - West"],
+  "Chimilute Trust Academy": ["Route 1 - Kabulonga", "Route 2 - Roma", "Route 3 - Woodlands", "Route 4 - Chelston"],
+  "Julani School": ["Route A - Town Center", "Route B - Parklands", "Route C - Riverside"],
+  "Crested Crane Academy": ["Route 1 - CBD", "Route 2 - Northrise", "Route 3 - Kansenshi", "Route 4 - Masala"],
+  "International Maarif School": ["Route A - Embassy Area", "Route B - Kabulonga", "Route C - Roma", "Route D - Woodlands", "Route E - Mass Media"]
+};
 
-const CANTEEN_OPTIONS = [
-  { label: "None", value: "none" },
-  { label: "Lunch - K1000 (Per month)", value: "lunch-1000" },
-  { label: "Breakfast - K500 (Per month)", value: "breakfast-500" },
-  { label: "Snacks - K300 (Per month)", value: "snacks-300" },
-];
+const TERM_OPTIONS = ["Term 1", "Term 2", "Term 3"];
 
-const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
-];
-
-function Dropdown({ 
+/**
+ * Premium Dropdown Component
+ * Apple-inspired dropdown with glassmorphism
+ */
+function PremiumDropdown({ 
   label, 
-  options, 
   value, 
+  options, 
   onChange 
 }: { 
   label: string; 
-  options: { label: string; value: string }[]; 
   value: string; 
+  options: string[]; 
   onChange: (value: string) => void;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const selectedOption = options.find(opt => opt.value === value);
-
   return (
-    <div className="content-stretch flex flex-col gap-[5px] items-start relative shrink-0 w-[250px]">
-      <div className="content-stretch flex gap-[10px] items-start relative shrink-0 w-full">
-        <p className="basis-0 font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] grow leading-[16px] min-h-px min-w-px not-italic relative shrink-0 text-[#2d3648] text-[8px] tracking-[-0.08px]">{label}</p>
-      </div>
-      <div className="relative w-full">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="bg-white h-[36px] relative rounded-[6px] w-full touch-manipulation"
+    <div className="w-full">
+      <label className="block font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] text-[10px] text-[#6b7280] uppercase tracking-[0.8px] mb-[6px]">
+        {label}
+      </label>
+      <div className="relative">
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full h-[36px] px-[12px] pr-[32px] bg-white border border-[#e5e7eb] rounded-[8px] font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] text-[12px] text-[#003630] appearance-none cursor-pointer hover:border-[#95e36c] focus:border-[#95e36c] focus:outline-none focus:ring-2 focus:ring-[#95e36c]/20 transition-all touch-manipulation"
+          onClick={(e) => e.stopPropagation()}
         >
-          <div className="content-stretch flex flex-col h-[36px] items-start overflow-clip relative rounded-[inherit] w-full">
-            <div className="h-[36px] relative shrink-0 w-full">
-              <div className="flex flex-row items-center size-full">
-                <div className="box-border content-stretch flex gap-[8px] h-[36px] items-center pl-[16px] pr-[12px] py-[12px] relative w-full">
-                  <p className="basis-0 font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] grow leading-[1.5] min-h-px min-w-px not-italic relative shrink-0 text-[#2d3648] text-[12px] tracking-[-0.12px] text-left">
-                    {selectedOption?.label || "Select..."}
-                  </p>
-                  <div className="relative shrink-0 size-[15px]">
-                    <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 15 15">
-                      <g id="Icon">
-                        <path d={svgPaths.p131c6b00} fill="var(--fill-0, #2D3648)" id="Shape" />
-                      </g>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div aria-hidden="true" className="absolute border border-[#cbd2e0] border-solid inset-0 pointer-events-none rounded-[6px]" />
-        </button>
-        
-        {isOpen && (
-          <>
-            <div 
-              className="fixed inset-0 z-40"
-              onClick={() => setIsOpen(false)}
-            />
-            <motion.div
-              className="absolute z-50 w-full mt-1 bg-white border border-[#cbd2e0] rounded-[6px] shadow-lg max-h-[200px] overflow-y-auto"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-            >
-              {options.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => {
-                    onChange(option.value);
-                    setIsOpen(false);
-                  }}
-                  className="w-full text-left px-[16px] py-[8px] hover:bg-[#f5f5f5] transition-colors"
-                >
-                  <p className="font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] text-[12px] text-[#2d3648] tracking-[-0.12px]">
-                    {option.label}
-                  </p>
-                </button>
-              ))}
-            </motion.div>
-          </>
-        )}
+          {options.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+        <div className="absolute right-[12px] top-1/2 -translate-y-1/2 pointer-events-none">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M3 4.5L6 7.5L9 4.5" stroke="#6b7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
       </div>
     </div>
   );
 }
 
-function MonthDropdown({ value, onChange }: { value: string; onChange: (value: string) => void }) {
-  const [isOpen, setIsOpen] = useState(false);
+/**
+ * Service Checkbox Item with Term and Route Selection
+ */
+function ServiceCheckbox({ 
+  service, 
+  isSelected, 
+  onToggle,
+  term,
+  onTermChange,
+  route,
+  onRouteChange,
+  schoolName
+}: { 
+  service: SchoolService; 
+  isSelected: boolean; 
+  onToggle: () => void;
+  term: string;
+  onTermChange: (term: string) => void;
+  route?: string;
+  onRouteChange?: (route: string) => void;
+  schoolName: string;
+}) {
+  const isTransport = service.category === 'transport';
+  const busRoutes = BUS_ROUTES[schoolName] || [];
 
   return (
-    <div className="content-stretch flex flex-col gap-[5px] items-start relative shrink-0 w-[250px]">
-      <div className="content-stretch flex gap-[10px] items-start relative shrink-0 w-full">
-        <p className="basis-0 font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] grow leading-[16px] min-h-px min-w-px not-italic relative shrink-0 text-[#2d3648] text-[8px] tracking-[-0.08px]">Month</p>
-      </div>
-      <div className="relative w-full">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="bg-white h-[36px] relative rounded-[6px] w-full touch-manipulation"
-        >
-          <div className="content-stretch flex flex-col h-[36px] items-start overflow-clip relative rounded-[inherit] w-full">
-            <div className="h-[36px] relative shrink-0 w-full">
-              <div className="flex flex-row items-center size-full">
-                <div className="box-border content-stretch flex gap-[8px] h-[36px] items-center pl-[16px] pr-[12px] py-[12px] relative w-full">
-                  <p className="basis-0 font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] grow leading-[1.5] min-h-px min-w-px not-italic relative shrink-0 text-[#2d3648] text-[12px] tracking-[-0.12px] text-left">
-                    {value}
-                  </p>
-                  <div className="relative shrink-0 size-[15px]">
-                    <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 15 15">
-                      <g id="Icon">
-                        <path d={svgPaths.p131c6b00} fill="var(--fill-0, #2D3648)" id="Shape" />
-                      </g>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div aria-hidden="true" className="absolute border border-[#cbd2e0] border-solid inset-0 pointer-events-none rounded-[6px]" />
-        </button>
+    <div className="w-full">
+      <button
+        onClick={onToggle}
+        className="w-full text-left px-[16px] py-[12px] hover:bg-[#f5f5f5] transition-colors touch-manipulation rounded-[6px] flex items-start gap-[12px]"
+      >
+        {/* Custom Checkbox */}
+        <div className={`mt-[2px] flex-shrink-0 w-[18px] h-[18px] rounded-[4px] border-2 transition-all ${
+          isSelected 
+            ? 'bg-[#95e36c] border-[#95e36c]' 
+            : 'bg-white border-[#cbd2e0]'
+        }`}>
+          {isSelected && (
+            <svg className="w-full h-full" viewBox="0 0 18 18" fill="none">
+              <path 
+                d="M4 9L7.5 12.5L14 6" 
+                stroke="#003630" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              />
+            </svg>
+          )}
+        </div>
         
-        {isOpen && (
-          <>
-            <div 
-              className="fixed inset-0 z-40"
-              onClick={() => setIsOpen(false)}
+        {/* Service Details */}
+        <div className="flex-1 min-w-0">
+          <p className="font-['IBM_Plex_Sans_Devanagari:SemiBold',sans-serif] text-[13px] text-[#003630] tracking-[-0.13px] mb-[2px]">
+            {service.name}
+          </p>
+          <p className="font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] text-[11px] text-[#6b7280] tracking-[-0.11px] mb-[4px]">
+            {service.description}
+          </p>
+          <div className="flex items-center gap-[8px]">
+            <p className="font-['IBM_Plex_Sans_Devanagari:Bold',sans-serif] text-[13px] text-[#003630] tracking-[-0.13px]">
+              ZMW {service.amount.toLocaleString()}
+            </p>
+            <span className="px-[6px] py-[2px] bg-[#e0f7d4] rounded-[4px] text-[9px] font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] text-[#003630] uppercase tracking-[0.5px]">
+              {service.category}
+            </span>
+          </div>
+        </div>
+      </button>
+
+      {/* Dropdowns (shown when selected) */}
+      {isSelected && (
+        <div className="px-[16px] pb-[12px] space-y-[8px]" onClick={(e) => e.stopPropagation()}>
+          <div className={`grid ${isTransport ? 'grid-cols-2' : 'grid-cols-1'} gap-[8px]`}>
+            {/* Term Dropdown */}
+            <PremiumDropdown
+              label="Select Term"
+              value={term}
+              options={TERM_OPTIONS}
+              onChange={onTermChange}
             />
-            <motion.div
-              className="absolute z-50 w-full mt-1 bg-white border border-[#cbd2e0] rounded-[6px] shadow-lg max-h-[200px] overflow-y-auto"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-            >
-              {MONTHS.map((month) => (
-                <button
-                  key={month}
-                  onClick={() => {
-                    onChange(month);
-                    setIsOpen(false);
-                  }}
-                  className="w-full text-left px-[16px] py-[8px] hover:bg-[#f5f5f5] transition-colors"
-                >
-                  <p className="font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] text-[12px] text-[#2d3648] tracking-[-0.12px]">
-                    {month}
-                  </p>
-                </button>
-              ))}
-            </motion.div>
-          </>
-        )}
+            
+            {/* Route Dropdown (only for transport services) */}
+            {isTransport && onRouteChange && (
+              <PremiumDropdown
+                label="Select Route"
+                value={route || busRoutes[0]}
+                options={busRoutes}
+                onChange={onRouteChange}
+              />
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Service Category Group
+ * Groups services by category with a header
+ */
+function ServiceCategoryGroup({ 
+  category, 
+  services, 
+  selectedIds, 
+  onToggle,
+  serviceTerms,
+  onTermChange,
+  serviceRoutes,
+  onRouteChange,
+  schoolName
+}: { 
+  category: string; 
+  services: SchoolService[]; 
+  selectedIds: Set<string>; 
+  onToggle: (id: string) => void;
+  serviceTerms: Record<string, string>;
+  onTermChange: (id: string, term: string) => void;
+  serviceRoutes: Record<string, string>;
+  onRouteChange: (id: string, route: string) => void;
+  schoolName: string;
+}) {
+  if (services.length === 0) return null;
+
+  const categoryLabels: Record<string, string> = {
+    tuition: "Tuition Fees",
+    meals: "Meals & Catering",
+    transport: "Transportation",
+    activities: "Activities & Programs",
+    supplies: "Supplies & Materials",
+    other: "Other Services"
+  };
+
+  return (
+    <div className="w-full">
+      <div className="px-[16px] py-[8px] bg-[#f9fafb] border-b border-[#e5e7eb]">
+        <p className="font-['IBM_Plex_Sans_Devanagari:SemiBold',sans-serif] text-[11px] text-[#6b7280] uppercase tracking-[0.8px]">
+          {categoryLabels[category] || category}
+        </p>
+      </div>
+      <div className="divide-y divide-[#f3f4f6]">
+        {services.map(service => (
+          <ServiceCheckbox
+            key={service.id}
+            service={service}
+            isSelected={selectedIds.has(service.id)}
+            onToggle={() => onToggle(service.id)}
+            term={serviceTerms[service.id] || "Term 1"}
+            onTermChange={(term) => onTermChange(service.id, term)}
+            route={serviceRoutes[service.id]}
+            onRouteChange={(route) => onRouteChange(service.id, route)}
+            schoolName={schoolName}
+          />
+        ))}
       </div>
     </div>
   );
 }
 
-export default function AddOtherServicesPopup({ onClose, onDone }: AddOtherServicesPopupProps) {
-  const [busService, setBusService] = useState(BUS_OPTIONS[0].value);
-  const [canteenService, setCanteenService] = useState(CANTEEN_OPTIONS[0].value);
-  const [month, setMonth] = useState("January");
+export default function AddOtherServicesPopup({ onClose, onDone, schoolName }: AddOtherServicesPopupProps) {
+  const [selectedServiceIds, setSelectedServiceIds] = useState<Set<string>>(new Set());
+  const [serviceTerms, setServiceTerms] = useState<Record<string, string>>({});
+  const [serviceRoutes, setServiceRoutes] = useState<Record<string, string>>({});
+  
+  // Get all services and filter out tuition (handled by Add School Fees)
+  const allServices = getSchoolServices(schoolName).filter(service => service.category !== 'tuition');
+  
+  // Group services by category
+  const servicesByCategory = allServices.reduce((acc, service) => {
+    if (!acc[service.category]) {
+      acc[service.category] = [];
+    }
+    acc[service.category].push(service);
+    return acc;
+  }, {} as Record<string, SchoolService[]>);
+
+  const toggleService = (serviceId: string) => {
+    setSelectedServiceIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(serviceId)) {
+        newSet.delete(serviceId);
+      } else {
+        newSet.add(serviceId);
+        // Initialize with default term if not set
+        if (!serviceTerms[serviceId]) {
+          setServiceTerms(prev => ({ ...prev, [serviceId]: "Term 1" }));
+        }
+        // Initialize with default route for transport services
+        const service = allServices.find(s => s.id === serviceId);
+        if (service?.category === 'transport' && !serviceRoutes[serviceId]) {
+          const routes = BUS_ROUTES[schoolName] || [];
+          if (routes.length > 0) {
+            setServiceRoutes(prev => ({ ...prev, [serviceId]: routes[0] }));
+          }
+        }
+      }
+      return newSet;
+    });
+  };
+
+  const handleTermChange = (serviceId: string, term: string) => {
+    setServiceTerms(prev => ({ ...prev, [serviceId]: term }));
+  };
+
+  const handleRouteChange = (serviceId: string, route: string) => {
+    setServiceRoutes(prev => ({ ...prev, [serviceId]: route }));
+  };
 
   const handleDone = () => {
-    // For now, we'll just pass the bus service info
-    const selectedBus = BUS_OPTIONS.find(opt => opt.value === busService);
-    onDone(selectedBus?.label || "", canteenService, month);
+    const selectedServices = allServices
+      .filter(service => selectedServiceIds.has(service.id))
+      .map(service => ({
+        id: service.id,
+        name: service.name,
+        amount: service.amount,
+        category: service.category,
+        term: serviceTerms[service.id] || "Term 1",
+        ...(service.category === 'transport' && { route: serviceRoutes[service.id] })
+      }));
+    
+    onDone(selectedServices);
   };
+
+  const selectedCount = selectedServiceIds.size;
+  const totalAmount = allServices
+    .filter(service => selectedServiceIds.has(service.id))
+    .reduce((sum, service) => sum + service.amount, 0);
 
   return (
     <>
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 z-40"
+        className="fixed inset-0 bg-black/30 z-40 backdrop-blur-sm"
         onClick={onClose}
       />
       
       {/* Popup */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+      <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none p-[16px]">
         <motion.div
-          className="bg-white rounded-[10px] shadow-xl pointer-events-auto w-[296px]"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-          transition={{ duration: 0.2 }}
+          className="bg-white rounded-[16px] shadow-[0px_20px_60px_rgba(0,54,48,0.25)] pointer-events-auto w-full max-w-[480px] max-h-[80vh] flex flex-col"
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
         >
-        <div className="content-stretch flex flex-col gap-[12px] items-center overflow-clip relative rounded-[10px] p-[12px]">
           {/* Header */}
-          <div className="box-border content-stretch flex gap-[10px] items-start justify-center p-[10px] relative shrink-0">
-            <p className="font-['Inter:Regular',sans-serif] font-normal leading-[24px] not-italic relative shrink-0 text-[#003049] text-[12px] text-nowrap tracking-[-0.12px] whitespace-pre">+ Add Other Services</p>
+          <div className="px-[20px] py-[18px] border-b border-[#e5e7eb]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-['IBM_Plex_Sans_Devanagari:Bold',sans-serif] text-[16px] text-[#003630] tracking-[-0.16px] mb-[2px]">
+                  Add Services
+                </p>
+                <p className="font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] text-[11px] text-[#6b7280] tracking-[-0.11px]">
+                  Select services, term, and route for {schoolName}
+                </p>
+              </div>
+              <button
+                onClick={onClose}
+                className="w-[32px] h-[32px] rounded-full hover:bg-[#f3f4f6] transition-colors flex items-center justify-center touch-manipulation"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M12 4L4 12M4 4L12 12" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
           </div>
 
-          {/* Dropdowns */}
-          <Dropdown
-            label="School Bus prices"
-            options={BUS_OPTIONS}
-            value={busService}
-            onChange={setBusService}
-          />
-          
-          <Dropdown
-            label="Canteen Prices"
-            options={CANTEEN_OPTIONS}
-            value={canteenService}
-            onChange={setCanteenService}
-          />
-          
-          <MonthDropdown
-            value={month}
-            onChange={setMonth}
-          />
+          {/* Services List - Scrollable */}
+          <div className="flex-1 overflow-y-auto">
+            {Object.entries(servicesByCategory).map(([category, services]) => (
+              <ServiceCategoryGroup
+                key={category}
+                category={category}
+                services={services}
+                selectedIds={selectedServiceIds}
+                onToggle={toggleService}
+                serviceTerms={serviceTerms}
+                onTermChange={handleTermChange}
+                serviceRoutes={serviceRoutes}
+                onRouteChange={handleRouteChange}
+                schoolName={schoolName}
+              />
+            ))}
+            
+            {allServices.length === 0 && (
+              <div className="py-[40px] px-[20px] text-center">
+                <p className="font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] text-[13px] text-[#6b7280]">
+                  No services available for this school.
+                </p>
+              </div>
+            )}
+          </div>
 
-          {/* Done Button */}
-          <div className="box-border content-stretch flex gap-[5px] h-[48px] items-center justify-end pl-0 pr-[12px] py-0 relative shrink-0 w-full">
+          {/* Footer with Summary and Done Button */}
+          <div className="border-t border-[#e5e7eb] px-[20px] py-[16px] bg-[#fafbfc]">
+            {selectedCount > 0 && (
+              <div className="mb-[12px] flex items-center justify-between">
+                <p className="font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] text-[12px] text-[#6b7280]">
+                  {selectedCount} service{selectedCount !== 1 ? 's' : ''} selected
+                </p>
+                <p className="font-['IBM_Plex_Sans_Devanagari:Bold',sans-serif] text-[14px] text-[#003630]">
+                  Total: ZMW {totalAmount.toLocaleString()}
+                </p>
+              </div>
+            )}
+            
             <button 
               onClick={handleDone}
-              className="bg-[#95e36c] box-border content-stretch flex gap-[10px] h-[48px] items-center justify-center px-[36px] py-0 relative rounded-[8px] flex-1 touch-manipulation active:scale-[0.98] transition-transform"
+              disabled={selectedCount === 0}
+              className="bg-[#95e36c] w-full h-[48px] rounded-[12px] transition-all touch-manipulation active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 shadow-[0px_4px_0px_0px_rgba(149,227,108,0.3)] active:shadow-[0px_1px_0px_0px_rgba(149,227,108,0.3)] active:translate-y-[3px] disabled:active:translate-y-0"
             >
-              <p className="font-['IBM_Plex_Sans_Devanagari:SemiBold',sans-serif] leading-[1.4] not-italic relative shrink-0 text-[#003630] text-[12px] text-nowrap whitespace-pre">Done</p>
+              <p className="font-['IBM_Plex_Sans_Devanagari:SemiBold',sans-serif] text-[14px] text-[#003630] tracking-[-0.14px]">
+                {selectedCount > 0 ? `Add ${selectedCount} Service${selectedCount !== 1 ? 's' : ''}` : 'Select Services'}
+              </p>
             </button>
           </div>
-        </div>
         </motion.div>
       </div>
     </>

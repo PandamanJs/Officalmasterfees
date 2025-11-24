@@ -10,6 +10,7 @@ import julaniLogo from "figma:asset/5454374a39c6c82a13d2a4e8bc2ca0899c331fc5.png
 import crestedCraneLogo from "figma:asset/5da21813da6fa21128f400330102b56ec04a15f5.png";
 import maarifLogo from "figma:asset/14e103bdb926a80d9f27d93b19086b97e7c47135.png";
 import { getLastPhone, saveLastPhone } from "../utils/preferences";
+import { PHONE_USER_MAP } from "../data/schoolData";
 
 /**
  * Component Props Interface
@@ -112,7 +113,7 @@ function SchoolTitle({ schoolName }: { schoolName: string }) {
             <div className="w-[120px] h-[120px] flex items-center justify-center">
               <img 
                 alt={`${schoolName} Logo`} 
-                className="max-w-[100px] max-h-[100px] object-contain" 
+                className="max-w-[160px] max-h-[160px] object-contain" 
                 src={logoPath} 
               />
             </div>
@@ -143,12 +144,6 @@ const COUNTRY_CODES = [
   { code: "+234", country: "NG", name: "Nigeria" },
   { code: "+233", country: "GH", name: "Ghana" },
 ];
-
-// Phone number to user name mapping
-const PHONE_USER_MAP: Record<string, string> = {
-  "977123456": "Mr Stephen Kapambwe",
-  "966987654": "Mrs Alice Mwamba",
-};
 
 interface TextInputProps {
   onValidationChange: (isValid: boolean, phone: string, userName: string) => void;
