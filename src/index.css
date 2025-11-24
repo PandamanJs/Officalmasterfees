@@ -78,6 +78,10 @@
     --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     --color-red-500: oklch(.637 .237 25.331);
+    --color-yellow-50: oklch(.987 .026 102.212);
+    --color-yellow-200: oklch(.945 .129 101.54);
+    --color-yellow-600: oklch(.681 .162 75.834);
+    --color-yellow-800: oklch(.476 .114 61.907);
     --color-gray-50: oklch(.985 .002 247.839);
     --color-gray-100: oklch(.967 .003 264.542);
     --color-gray-400: oklch(.707 .022 261.325);
@@ -89,6 +93,8 @@
     --color-black: #000;
     --color-white: #fff;
     --spacing: .25rem;
+    --text-sm: .875rem;
+    --text-sm--line-height: calc(1.25 / .875);
     --font-weight-extralight: 200;
     --font-weight-light: 300;
     --font-weight-normal: 400;
@@ -103,6 +109,7 @@
     --shadow-sm: 0 1px 3px 0 #0000001a, 0 1px 2px -1px #0000001a;
     --shadow-md: 0 4px 6px -1px #0000001a, 0 2px 4px -2px #0000001a;
     --shadow-lg: 0 10px 15px -3px #0000001a, 0 4px 6px -4px #0000001a;
+    --animate-spin: spin 1s linear infinite;
     --blur-sm: 8px;
     --blur-xl: 24px;
     --default-transition-duration: .15s;
@@ -548,6 +555,10 @@
     top: 43px;
   }
 
+  .top-\[66px\] {
+    top: 66px;
+  }
+
   .top-\[118px\] {
     top: 118px;
   }
@@ -970,6 +981,10 @@
 
   .grid {
     display: grid;
+  }
+
+  .hidden {
+    display: none;
   }
 
   .inline-grid {
@@ -1789,6 +1804,10 @@
     transform: var(--tw-rotate-x) var(--tw-rotate-y) var(--tw-rotate-z) var(--tw-skew-x) var(--tw-skew-y);
   }
 
+  .animate-spin {
+    animation: var(--animate-spin);
+  }
+
   .cursor-not-allowed {
     cursor: not-allowed;
   }
@@ -2249,6 +2268,18 @@
     border-color: #0000;
   }
 
+  .border-yellow-200 {
+    border-color: var(--color-yellow-200);
+  }
+
+  .border-yellow-600 {
+    border-color: var(--color-yellow-600);
+  }
+
+  .border-t-transparent {
+    border-top-color: #0000;
+  }
+
   .bg-\[\#6b7280\] {
     background-color: #6b7280;
   }
@@ -2335,6 +2366,10 @@
     .bg-white\/80 {
       background-color: color-mix(in oklab, var(--color-white) 80%, transparent);
     }
+  }
+
+  .bg-yellow-50 {
+    background-color: var(--color-yellow-50);
   }
 
   .bg-gradient-to-b {
@@ -2555,6 +2590,10 @@
     padding-block: 4px;
   }
 
+  .py-\[6px\] {
+    padding-block: 6px;
+  }
+
   .py-\[8px\] {
     padding-block: 8px;
   }
@@ -2767,6 +2806,10 @@
     font-family: Agrandir\:Grand Heavy, sans-serif;
   }
 
+  .font-\[\'IBM_Plex_Sans\:Medium\'\,sans-serif\] {
+    font-family: IBM Plex Sans\:Medium, sans-serif;
+  }
+
   .font-\[\'IBM_Plex_Sans\:Regular\'\,sans-serif\] {
     font-family: IBM Plex Sans\:Regular, sans-serif;
   }
@@ -2849,6 +2892,11 @@
 
   .font-\[\'SF_Pro_Text\:Semibold\'\,system-ui\,-apple-system\,sans-serif\] {
     font-family: SF Pro Text\:Semibold, system-ui, -apple-system, sans-serif;
+  }
+
+  .text-sm {
+    font-size: var(--text-sm);
+    line-height: var(--tw-leading, var(--text-sm--line-height));
   }
 
   .text-\[0px\] {
@@ -3216,6 +3264,10 @@
     color: #bdbdbd;
   }
 
+  .text-\[rgba\(0\,0\,0\,0\.5\)\] {
+    color: #00000080;
+  }
+
   .text-\[rgba\(0\,0\,0\,0\.64\)\] {
     color: #000000a3;
   }
@@ -3276,6 +3328,10 @@
 
   .text-white {
     color: var(--color-white);
+  }
+
+  .text-yellow-800 {
+    color: var(--color-yellow-800);
   }
 
   .uppercase {
@@ -4769,4 +4825,10 @@ button:disabled:before {
   syntax: "*";
   inherits: false;
   initial-value: 1;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

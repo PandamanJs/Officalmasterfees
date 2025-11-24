@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { initializeLencoPayment, isLencoReady } from "../utils/lencoPayment";
 import { useAppStore } from "../stores/useAppStore";
 import { toast } from "sonner@2.0.3";
-import ExpandedMobileMoney from "../imports/Frame1707478927-18-820";
+import ExpandedMobileMoney from "../imports/Frame1707478923";
 import ExpandedCardPayment from "../imports/Frame1707478923-18-800";
 import imgVisa from "figma:asset/1f8bb25a1b5f5bd54da90c9c6ed22e37e8ea0e08.png";
 import imgMastercardLogo from "figma:asset/b4ecaef28ab74a96d96cfaf9b70d374fa01fed41.png";
@@ -655,6 +655,7 @@ const validateCVV = (cvv: string): string => {
 export default function PaymentPage({ onBack, onPay, totalAmount }: PaymentPageProps) {
   const [isMobileMoneyExpanded, setIsMobileMoneyExpanded] = useState(false);
   const [isCardPaymentExpanded, setIsCardPaymentExpanded] = useState(false);
+  const [isLencoLoaded, setIsLencoLoaded] = useState(false);
   
   // Mobile Money state
   const [mobileNumber, setMobileNumber] = useState('');
@@ -673,17 +674,28 @@ export default function PaymentPage({ onBack, onPay, totalAmount }: PaymentPageP
   // Store state
   const { userName, userPhone, selectedSchool, checkoutServices } = useAppStore();
 
-  // Check if Lenco is loaded
+  // Check if Lenco is loaded with retry mechanism
   useEffect(() => {
+    let attempts = 0;
+    const maxAttempts = 50; // Try for 5 seconds (50 * 100ms)
+    
     const checkLenco = setInterval(() => {
+      attempts++;
+      
       if (isLencoReady()) {
-        console.log('Lenco payment widget loaded successfully');
+        console.log('✅ Lenco payment widget loaded successfully');
+        setIsLencoLoaded(true);
+        clearInterval(checkLenco);
+      } else if (attempts >= maxAttempts) {
+        console.error('❌ Lenco widget failed to load after 5 seconds');
+        console.log('🔍 Troubleshooting:');
+        console.log('   1. Check if https://pay.sandbox.lenco.co/js/v1/inline.js is accessible');
+        console.log('   2. Check browser console for script loading errors');
+        console.log('   3. Check if ad blockers are blocking the script');
+        console.log('   4. Try disabling browser extensions');
         clearInterval(checkLenco);
       }
     }, 100);
-    
-    // Cleanup after 10 seconds
-    setTimeout(() => clearInterval(checkLenco), 10000);
     
     return () => clearInterval(checkLenco);
   }, []);
@@ -854,6 +866,16 @@ export default function PaymentPage({ onBack, onPay, totalAmount }: PaymentPageP
     <div className="bg-white h-screen w-full overflow-hidden flex items-center justify-center">
       <div className="relative w-full max-w-[393px] md:max-w-[500px] lg:max-w-[600px] h-screen mx-auto shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden" data-name="Payment Page">
         <Header onBack={onBack} />
+        
+        {/* Lenco Loading Indicator */}
+        {!isLencoLoaded && (
+          <div className="hidden absolute top-[66px] left-0 right-0 bg-yellow-50 border-b border-yellow-200 px-4 py-2 z-50">
+            <div className="flex items-center gap-2 text-yellow-800 text-sm">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-yellow-600 border-t-transparent"></div>
+              <span>Loading payment system...</span>
+            </div>
+          </div>
+        )}
         
         <div className="relative bg-white flex-1 overflow-hidden">
           <div className="relative h-full">
