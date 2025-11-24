@@ -1,6 +1,8 @@
 import { motion } from "motion/react";
 import svgPaths from "../imports/svg-o96q0cdj2h";
 import headerSvgPaths from "../imports/svg-co0ktog99f";
+import { useState } from "react";
+import ViewPaymentPlansPage from "./ViewPaymentPlansPage";
 
 interface ServicesPageProps {
   userName: string;
@@ -258,8 +260,31 @@ function Frame6({ onSelectService, onViewHistory, onPayFees }: { onSelectService
 }
 
 export default function ServicesPage({ userName, onBack, onSelectService, onViewHistory, onPayFees }: ServicesPageProps) {
+  const [showPaymentPlans, setShowPaymentPlans] = useState(false);
   const currentHour = new Date().getHours();
   const greeting = currentHour >= 5 && currentHour < 12 ? "Good morning" : currentHour >= 12 && currentHour < 17 ? "Good Afternoon" : "Good Evening";
+
+  const handleViewPaymentPlans = (service: string) => {
+    if (service === "payment-plans") {
+      setShowPaymentPlans(true);
+    } else {
+      onSelectService(service);
+    }
+  };
+
+  const handleBackFromPaymentPlans = () => {
+    setShowPaymentPlans(false);
+  };
+
+  // Show payment plans page if requested
+  if (showPaymentPlans) {
+    return (
+      <ViewPaymentPlansPage 
+        onBack={handleBackFromPaymentPlans}
+        schoolName="International School" 
+      />
+    );
+  }
 
   return (
     <div className="bg-white min-h-screen w-full overflow-hidden flex items-center justify-center" data-name="Page 2">
@@ -269,7 +294,7 @@ export default function ServicesPage({ userName, onBack, onSelectService, onView
           <p className="font-['IBM_Plex_Sans_Devanagari:Light',sans-serif] mb-[14px]">{greeting}, </p>
           <p className="font-['Agrandir:Grand_Heavy',sans-serif] text-[#003630]">{userName}</p>
         </div>
-        <Frame6 onSelectService={onSelectService} onViewHistory={onViewHistory} onPayFees={onPayFees} />
+        <Frame6 onSelectService={handleViewPaymentPlans} onViewHistory={onViewHistory} onPayFees={onPayFees} />
       </div>
     </div>
   );

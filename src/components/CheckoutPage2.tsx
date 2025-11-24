@@ -126,7 +126,7 @@ function StudentServiceGroup({
           {studentName}
         </p>
       </div>
-      <div className="glass-light rounded-[12px] p-3 space-y-3" 
+      <div className="glass-light rounded-[12px] p-3 flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-thin" 
         style={{
           background: 'linear-gradient(135deg, rgba(248, 249, 250, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%)',
           border: '1px solid rgba(149, 227, 108, 0.1)'
@@ -134,7 +134,7 @@ function StudentServiceGroup({
         {services.map((service, index) => (
           <div 
             key={service.id} 
-            className="card card-interactive rounded-[10px] p-3 animate-fade-in group"
+            className="card card-interactive rounded-[10px] p-3 animate-fade-in group flex-shrink-0 w-[280px] snap-center"
             style={{ 
               animationDelay: `${150 + index * 50}ms`,
               background: 'white'
