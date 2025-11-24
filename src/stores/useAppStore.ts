@@ -52,6 +52,7 @@ interface AppState {
   // Checkout State
   checkoutServices: CheckoutService[];
   paymentAmount: number;
+  paymentReference: string;
   
   // Receipt State
   receiptStudentName: string;
@@ -84,6 +85,7 @@ interface AppState {
   removeCheckoutService: (serviceId: string) => void;
   clearCheckoutServices: () => void;
   setPaymentAmount: (amount: number) => void;
+  setPaymentReference: (reference: string) => void;
   
   // Receipt Actions
   setReceiptStudent: (name: string, id: string) => void;
@@ -114,6 +116,7 @@ export const useAppStore = create<AppState>()(
       selectedStudentIds: [],
       checkoutServices: [],
       paymentAmount: 0,
+      paymentReference: '',
       receiptStudentName: '',
       receiptStudentId: '',
       receiptPaymentData: {},
@@ -171,6 +174,8 @@ export const useAppStore = create<AppState>()(
       
       setPaymentAmount: (amount) => set({ paymentAmount: amount }),
       
+      setPaymentReference: (reference) => set({ paymentReference: reference }),
+      
       // Receipt Actions
       setReceiptStudent: (name, id) => set({ 
         receiptStudentName: name, 
@@ -192,6 +197,7 @@ export const useAppStore = create<AppState>()(
         selectedStudentIds: [],
         checkoutServices: [],
         paymentAmount: 0,
+        paymentReference: '',
       }),
       
       resetAll: () => set({
@@ -203,6 +209,7 @@ export const useAppStore = create<AppState>()(
         selectedStudentIds: [],
         checkoutServices: [],
         paymentAmount: 0,
+        paymentReference: '',
         receiptStudentName: '',
         receiptStudentId: '',
         receiptPaymentData: {},
@@ -242,6 +249,7 @@ export const useUserInfo = () => useAppStore((state) => ({
 export const useCheckoutData = () => useAppStore((state) => ({
   checkoutServices: state.checkoutServices,
   paymentAmount: state.paymentAmount,
+  paymentReference: state.paymentReference,
   selectedStudentIds: state.selectedStudentIds,
 }));
 

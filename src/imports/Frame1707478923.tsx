@@ -1,4 +1,5 @@
 import { ChevronDown } from "lucide-react";
+import { detectNetwork, getNetworkInfo } from "../utils/networkDetection";
 
 interface ExpandedMobileMoneyProps {
   mobileNumber: string;
@@ -26,6 +27,10 @@ export default function ExpandedMobileMoney({
     const formatted = formatPhoneNumber(e.target.value);
     onMobileNumberChange(formatted);
   };
+
+  // Detect network from current mobile number
+  const networkInfo = getNetworkInfo(mobileNumber);
+  const hasNetwork = networkInfo.name !== null;
 
   return (
     <div className="bg-white border border-[#003630] rounded-[12px] p-[16px] w-full">
@@ -73,6 +78,33 @@ export default function ExpandedMobileMoney({
             />
           </div>
         </div>
+        
+        {/* Network Detection Badge */}
+        {hasNetwork && (
+          <div className="flex items-center gap-[8px] mt-[4px]">
+            <div 
+              className="px-[12px] py-[6px] rounded-[8px] flex items-center gap-[6px]"
+              style={{ 
+                backgroundColor: `${networkInfo.color}15`,
+                border: `1px solid ${networkInfo.color}40`
+              }}
+            >
+              <div 
+                className="w-[8px] h-[8px] rounded-full"
+                style={{ backgroundColor: networkInfo.color }}
+              />
+              <span 
+                className="font-['IBM_Plex_Sans:Medium',sans-serif] text-[12px] tracking-[-0.12px]"
+                style={{ color: networkInfo.color }}
+              >
+                {networkInfo.name}
+              </span>
+            </div>
+            <span className="font-['IBM_Plex_Sans:Regular',sans-serif] text-[11px] text-[rgba(0,0,0,0.5)]">
+              Network detected
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

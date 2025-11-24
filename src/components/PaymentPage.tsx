@@ -1,15 +1,35 @@
+import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { useState } from "react";
-import svgPaths from "../imports/svg-ft8f5pz3nc";
-import headerSvgPaths from "../imports/svg-4boykq1z8d";
-import imgVisa from "figma:asset/a5c75a14f01268c2534d0dfb0a9182a2bf3629d2.png";
-import imgMastercardLogo from "figma:asset/5f1f04717ce88a1f8a9d6faeee898c4b88ef23f0.png";
-import ExpandedMobileMoney from "../imports/Frame1707478923";
+import { initializeLencoPayment, isLencoReady } from "../utils/lencoPayment";
+import { useAppStore } from "../stores/useAppStore";
+import { toast } from "sonner@2.0.3";
+import ExpandedMobileMoney from "../imports/Frame1707478927-18-820";
 import ExpandedCardPayment from "../imports/Frame1707478923-18-800";
+import imgVisa from "figma:asset/1f8bb25a1b5f5bd54da90c9c6ed22e37e8ea0e08.png";
+import imgMastercardLogo from "figma:asset/b4ecaef28ab74a96d96cfaf9b70d374fa01fed41.png";
+
+// SVG Path Data
+const headerSvgPaths = {
+  p24506700: "M6 5.98528H28.0294C30.2268 5.98528 32.0094 7.76793 32.0094 9.96528V27.0147C32.0094 29.212 30.2268 30.9947 28.0294 30.9947H6C3.80264 30.9947 2.02 29.212 2.02 27.0147V9.96528C2.02 7.76793 3.80264 5.98528 6 5.98528Z",
+  p8fdf600: "M10 15L17 8L24 15"
+};
+
+const svgPaths = {
+  pd1b480: "M1 4.75C1 2.67893 2.67893 1 4.75 1H12.25C14.3211 1 16 2.67893 16 4.75V17.25C16 19.3211 14.3211 21 12.25 21H4.75C2.67893 21 1 19.3211 1 17.25V4.75Z",
+  p34703900: "M6.75 17.5H10.25",
+  p4ee5080: "M21.0039 13.7539C20.0039 11.2539 17.5039 11.2539 16.5039 13.7539L14.5039 18.5039C13.5039 21.0039 14.7539 22.2539 17.2539 21.2539L20.2539 20.0039C20.7539 19.7539 21.2539 19.5039 21.7539 19.2539C22.2539 19.0039 22.7539 18.7539 23.2539 18.5039L25.2539 17.7539C27.7539 16.7539 27.7539 14.2539 25.2539 13.2539L21.0039 11.2539V13.7539Z",
+  pec23280: "M6.00195 10.002C6.00195 9.44971 6.44967 9.00195 7.00195 9.00195H13.002C13.5542 9.00195 14.002 9.44971 14.002 10.002V16.002C14.002 16.5542 13.5542 17.002 13.002 17.002H7.00195C6.44967 17.002 6.00195 16.5542 6.00195 16.002V10.002Z M10.002 11.502L10.502 11.002L13.502 14.002L13.002 14.502L10.002 11.502Z M10.002 13.002C9.44967 13.002 9.00195 13.4497 9.00195 14.002C9.00195 14.5542 9.44967 15.002 10.002 15.002C10.5542 15.002 11.002 14.5542 11.002 14.002C11.002 13.4497 10.5542 13.002 10.002 13.002Z",
+  p116ac00: "M7.16113 10.0039V16.0039H13.1611M7.16113 10.0039L10.1611 13.0039M7.16113 10.0039L10.1611 7.00391M21.1611 16.0039L18.1611 13.0039M21.1611 16.0039L18.1611 19.0039M21.1611 16.0039V10.0039H15.1611",
+  p1c5ceb00: "M2.5 11.1625V15.7625C2.5 21.7625 5 23.5125 10 23.5125H16.25C21.25 23.5125 23.75 21.7625 23.75 15.7625V11.1625",
+  p14a0380: "M6.25 2.5125H20C25 2.5125 26.25 3.7625 26.25 8.7625V10.5125C26.25 15.5125 25 16.7625 20 16.7625H6.25C1.25 16.7625 0 15.5125 0 10.5125V8.7625C0 3.7625 1.25 2.5125 6.25 2.5125Z",
+  pa48d6b0: "M11 6V7C11 8.10457 10.1046 9 9 9H7C5.89543 9 5 8.10457 5 7V6M3 6H13M12 6V12C12 13.1046 11.1046 14 10 14H6C4.89543 14 4 13.1046 4 12V6",
+  p1c1f0680: "M12.5 12.5L51.5 51.5",
+  p32888500: "M12.5 12.5L51.5 51.5"
+};
 
 interface PaymentPageProps {
   onBack: () => void;
-  onPay: () => void;
+  onPay: (reference: string) => void;
   totalAmount: number;
 }
 
@@ -649,6 +669,24 @@ export default function PaymentPage({ onBack, onPay, totalAmount }: PaymentPageP
   const [expiryDateError, setExpiryDateError] = useState('');
   const [cvvError, setCvvError] = useState('');
   const [touched, setTouched] = useState({ cardNumber: false, expiryDate: false, cvv: false });
+  
+  // Store state
+  const { userName, userPhone, selectedSchool, checkoutServices } = useAppStore();
+
+  // Check if Lenco is loaded
+  useEffect(() => {
+    const checkLenco = setInterval(() => {
+      if (isLencoReady()) {
+        console.log('Lenco payment widget loaded successfully');
+        clearInterval(checkLenco);
+      }
+    }, 100);
+    
+    // Cleanup after 10 seconds
+    setTimeout(() => clearInterval(checkLenco), 10000);
+    
+    return () => clearInterval(checkLenco);
+  }, []);
 
   const handleMobileMoneyClick = () => {
     setIsMobileMoneyExpanded(!isMobileMoneyExpanded);
@@ -706,10 +744,15 @@ export default function PaymentPage({ onBack, onPay, totalAmount }: PaymentPageP
   };
   
   const canPay = () => {
-    return isCardValid() && isMobileMoneyValid();
+    // At least one payment method must be expanded and valid
+    const hasMobileMoneyExpanded = isMobileMoneyExpanded && isMobileMoneyValid();
+    const hasCardExpanded = isCardPaymentExpanded && isCardValid();
+    
+    return hasMobileMoneyExpanded || hasCardExpanded;
   };
   
   const handlePay = () => {
+    // Validate all inputs
     if (isCardPaymentExpanded) {
       setTouched({ cardNumber: true, expiryDate: true, cvv: true });
       const cardErr = validateCardNumber(cardNumber);
@@ -720,15 +763,92 @@ export default function PaymentPage({ onBack, onPay, totalAmount }: PaymentPageP
       setExpiryDateError(expiryErr);
       setCvvError(cvvErr);
       
-      if (cardErr || expiryErr || cvvErr) return;
+      if (cardErr || expiryErr || cvvErr) {
+        toast.error('Please fix the errors in your card details');
+        return;
+      }
     }
     
-    if (canPay()) {
-      onPay();
+    if (!canPay()) {
+      toast.error('Please select a payment method and fill in all required fields');
+      return;
+    }
+
+    // Check if Lenco is ready
+    if (!isLencoReady()) {
+      console.warn('⚠️ Lenco widget not loaded - check if script is blocked or loading');
+      toast.error('Payment system is loading. Please try again in a moment.');
+      return;
+    }
+
+    // Get Lenco public key from environment
+    const lencoPublicKey = import.meta.env.VITE_LENCO_PUBLIC_KEY;
+    
+    if (!lencoPublicKey || lencoPublicKey === 'pk_sandbox_your_public_key_here') {
+      console.error('❌ LENCO_PUBLIC_KEY not configured in .env file');
+      console.log('📝 Please add your Lenco public key to the .env file:');
+      console.log('   VITE_LENCO_PUBLIC_KEY=pk_sandbox_your_actual_key');
+      toast.error('Payment system not configured. Please add your Lenco API key to .env file.');
+      return;
+    }
+
+    console.log('🔑 Using Lenco public key:', lencoPublicKey.substring(0, 20) + '...');
+
+    // Generate user email from phone if not available
+    const userEmail = `${userPhone}@masterfees.app`;
+
+    // Prepare services for payment data
+    const services = checkoutServices.map(service => ({
+      name: service.description,
+      amount: service.amount,
+    }));
+
+    console.log('💳 Initializing Lenco payment with:');
+    console.log('   Amount: K' + (totalAmount + (totalAmount * 0.02)).toFixed(2));
+    console.log('   Customer:', userName || 'Guest User');
+    console.log('   Phone:', userPhone || mobileNumber);
+    console.log('   Email:', userEmail);
+    console.log('   School:', selectedSchool || 'School');
+    console.log('   Services:', services.length);
+
+    // Initialize Lenco payment
+    try {
+      initializeLencoPayment(
+        {
+          userName: userName || 'Guest User',
+          userPhone: userPhone || mobileNumber,
+          userEmail: userEmail,
+          amount: totalAmount + (totalAmount * 0.02), // Including service fee
+          schoolName: selectedSchool || 'School',
+          services: services,
+        },
+        lencoPublicKey,
+        (reference) => {
+          // Payment successful callback
+          console.log('✅ Payment successful with reference:', reference);
+          toast.success('Payment initiated successfully!');
+          onPay(reference);
+        },
+        () => {
+          // Payment closed callback
+          console.log('❌ Payment window closed by user');
+          toast.info('Payment cancelled');
+        },
+        () => {
+          // Payment confirmation pending callback
+          console.log('⏳ Payment confirmation pending');
+          toast.info('Your payment is being confirmed. Please wait...');
+          // Still proceed to processing page
+          onPay('PENDING');
+        }
+      );
+      
+      console.log('🚀 Lenco payment widget opened');
+    } catch (error) {
+      console.error('💥 Error initializing payment:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to initialize payment');
     }
   };
-
-
 
   return (
     <div className="bg-white h-screen w-full overflow-hidden flex items-center justify-center">

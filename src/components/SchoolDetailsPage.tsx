@@ -225,40 +225,42 @@ function TextInput({ onValidationChange }: TextInputProps) {
   };
 
   return (
-    <div className="bg-white relative rounded-[10px] w-full h-[50px]" data-name="Text Input">
-      <div aria-hidden="true" className="absolute border-[#003049] border-[0.5px] border-solid inset-0 pointer-events-none rounded-[10px]" />
-      <div className="size-full">
-        <div className="box-border flex items-center gap-[8px] p-[12px] size-full">
-          {/* Country Code Selector */}
-          <div className="relative flex-shrink-0">
-            <select
-              value={countryCode}
-              onChange={(e) => setCountryCode(e.target.value)}
-              className="appearance-none bg-transparent border-none outline-none font-['IBM_Plex_Sans:Regular',sans-serif] text-[14px] text-black pr-[20px] cursor-pointer touch-manipulation"
-              style={{ WebkitAppearance: "none" }}
-            >
-              {COUNTRY_CODES.map((country) => (
-                <option key={country.code} value={country.code}>
-                  {country.code}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-black opacity-60" />
+    <div className="flex flex-col gap-[8px] w-full">
+      <div className="bg-white relative rounded-[10px] w-full h-[50px]" data-name="Text Input">
+        <div aria-hidden="true" className="absolute border-[#003049] border-[0.5px] border-solid inset-0 pointer-events-none rounded-[10px]" />
+        <div className="size-full">
+          <div className="box-border flex items-center gap-[8px] p-[12px] size-full">
+            {/* Country Code Selector */}
+            <div className="relative flex-shrink-0">
+              <select
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
+                className="appearance-none bg-transparent border-none outline-none font-['IBM_Plex_Sans:Regular',sans-serif] text-[14px] text-black pr-[20px] cursor-pointer touch-manipulation"
+                style={{ WebkitAppearance: "none" }}
+              >
+                {COUNTRY_CODES.map((country) => (
+                  <option key={country.code} value={country.code}>
+                    {country.code}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-black opacity-60" />
+            </div>
+            
+            {/* Separator */}
+            <div className="h-[24px] w-[1px] bg-[rgba(45,54,72,0.2)] flex-shrink-0" />
+            
+            {/* Phone Input */}
+            <input
+              type="tel"
+              value={inputValue}
+              onChange={handleInputChange}
+              onBlur={handleBlur}
+              placeholder="977-123-456"
+              maxLength={11}
+              className="flex-1 bg-transparent border-none outline-none font-['IBM_Plex_Sans:Regular',sans-serif] text-[14px] text-black placeholder:text-[rgba(45,54,72,0.44)] tracking-[-0.14px] touch-manipulation"
+            />
           </div>
-          
-          {/* Separator */}
-          <div className="h-[24px] w-[1px] bg-[rgba(45,54,72,0.2)] flex-shrink-0" />
-          
-          {/* Phone Input */}
-          <input
-            type="tel"
-            value={inputValue}
-            onChange={handleInputChange}
-            onBlur={handleBlur}
-            placeholder="977-123-456"
-            maxLength={11}
-            className="flex-1 bg-transparent border-none outline-none font-['IBM_Plex_Sans:Regular',sans-serif] text-[14px] text-black placeholder:text-[rgba(45,54,72,0.44)] tracking-[-0.14px] touch-manipulation"
-          />
         </div>
       </div>
     </div>

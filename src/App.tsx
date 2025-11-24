@@ -785,7 +785,9 @@ export default function Page() {
     window.history.back();
   };
 
-  const handlePaymentComplete = () => {
+  const handlePaymentComplete = (reference: string) => {
+    // Store the payment reference for verification
+    useAppStore.setState({ paymentReference: reference });
     navigateToPage("processing");
   };
 

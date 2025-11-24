@@ -196,6 +196,198 @@ app.get("/make-server-f6550ac6/payments/:phone", async (c) => {
   }
 });
 
+/**
+ * Verify Lenco Payment Endpoint
+ * 
+ * Verifies a payment with Lenco's API
+ * This should be called after a successful payment to confirm the status
+ * 
+ * @route GET /make-server-f6550ac6/verify-payment/:reference
+ * @param reference - Lenco payment reference
+ * @returns JSON object with payment verification data
+ */
+app.get("/make-server-f6550ac6/verify-payment/:reference", async (c) => {
+  try {
+    const reference = c.req.param("reference");
+    
+    if (!reference) {
+      return c.json({ 
+        success: false, 
+        error: "Payment reference is required" 
+      }, 400);
+    }
+
+    // Get Lenco secret key from environment
+    const lencoSecretKey = Deno.env.get("LENCO_SECRET_KEY");
+    
+    if (!lencoSecretKey) {
+      console.error("LENCO_SECRET_KEY not configured in environment variables");
+      return c.json({ 
+        success: false, 
+        error: "Payment verification system not configured" 
+      }, 500);
+    }
+
+    // Call Lenco API to verify payment
+    const lencoApiUrl = `https://api.sandbox.lenco.co/access/v2/collections/status/${reference}`;
+    
+    console.log(`Verifying payment with Lenco: ${reference}`);
+    
+    const response = await fetch(lencoApiUrl, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${lencoSecretKey}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Lenco API error (${response.status}):`, errorText);
+      return c.json({ 
+        success: false, 
+        error: `Payment verification failed: ${response.status} ${response.statusText}`,
+        details: errorText
+      }, response.status);
+    }
+
+    const verificationData = await response.json();
+    
+    console.log(`Payment verification successful for ${reference}:`, verificationData);
+
+    // Store verification result
+    if (verificationData.status && verificationData.data) {
+      const verificationKey = `lenco_verification:${reference}`;
+      await kv.set(verificationKey, {
+        ...verificationData.data,
+        verifiedAt: new Date().toISOString()
+      });
+    }
+
+    return c.json({ 
+      success: true, 
+      data: verificationData
+    });
+  } catch (error) {
+    console.error("Error verifying payment with Lenco:", error);
+    return c.json({ 
+      success: false, 
+      error: `Failed to verify payment: ${error.message}` 
+    }, 500);
+  }
+});
+
+/**
+ * Lenco Payment Webhook Endpoint
+ * 
+ * Receives real-time payment notifications from Lenco
+ * This endpoint is called by Lenco when payment status changes
+ * 
+ * @route POST /make-server-f6550ac6/webhooks/lenco
+ * @body Payment notification data from Lenco
+ * @returns JSON object with acknowledgment
+ */
+app.post("/make-server-f6550ac6/webhooks/lenco", async (c) => {
+  try {
+    console.log("📥 Received Lenco webhook");
+    
+    const webhookData = await c.req.json();
+    
+    console.log("Webhook payload:", JSON.stringify(webhookData, null, 2));
+    
+    // Extract relevant information
+    const {
+      reference,
+      status,
+      amount,
+      customer,
+      metadata,
+      transaction_reference,
+      payment_method,
+      created_at,
+      updated_at
+    } = webhookData;
+
+    if (!reference) {
+      console.error("❌ Webhook missing payment reference");
+      return c.json({ 
+        success: false, 
+        error: "Missing payment reference" 
+      }, 400);
+    }
+
+    console.log(`📝 Processing webhook for payment: ${reference}`);
+    console.log(`   Status: ${status}`);
+    console.log(`   Amount: ${amount}`);
+    console.log(`   Method: ${payment_method}`);
+
+    // Store webhook notification
+    const webhookKey = `webhook:${reference}:${Date.now()}`;
+    await kv.set(webhookKey, {
+      ...webhookData,
+      receivedAt: new Date().toISOString()
+    });
+
+    // Update payment status in our system
+    const paymentStatusKey = `payment_status:${reference}`;
+    const existingStatus = await kv.get(paymentStatusKey) || {};
+    
+    await kv.set(paymentStatusKey, {
+      ...existingStatus,
+      reference,
+      status,
+      amount,
+      payment_method,
+      transaction_reference,
+      customer,
+      metadata,
+      lastUpdated: new Date().toISOString(),
+      webhookReceived: true,
+      created_at,
+      updated_at
+    });
+
+    // If payment is successful, update the payment record
+    if (status === "success" || status === "completed" || status === "successful") {
+      console.log(`✅ Payment ${reference} is successful`);
+      
+      // Find and update the payment record
+      const verificationKey = `lenco_verification:${reference}`;
+      const verification = await kv.get(verificationKey) || {};
+      
+      await kv.set(verificationKey, {
+        ...verification,
+        status: "completed",
+        webhookConfirmed: true,
+        webhookConfirmedAt: new Date().toISOString()
+      });
+      
+      console.log(`✅ Updated verification record for ${reference}`);
+    } else if (status === "failed" || status === "declined") {
+      console.log(`❌ Payment ${reference} failed or was declined`);
+    } else {
+      console.log(`⏳ Payment ${reference} status: ${status}`);
+    }
+
+    // Acknowledge receipt of webhook
+    return c.json({ 
+      success: true, 
+      message: "Webhook received and processed",
+      reference
+    });
+  } catch (error) {
+    console.error("❌ Error processing Lenco webhook:", error);
+    
+    // Still return 200 OK to prevent Lenco from retrying
+    // but log the error for debugging
+    return c.json({ 
+      success: false, 
+      error: `Webhook processing error: ${error.message}`,
+      message: "Acknowledged with errors"
+    }, 200);
+  }
+});
+
 // Start the server
 // Note: All routes must be prefixed with /make-server-f6550ac6
 Deno.serve(app.fetch);

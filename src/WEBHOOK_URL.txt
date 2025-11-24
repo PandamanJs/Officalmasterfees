@@ -1,0 +1,20 @@
+================================================================
+🔔 LENCO WEBHOOK URL - Copy this into Lenco Dashboard
+================================================================
+
+https://cnqcshrhcptgchlahjsa.supabase.co/functions/v1/make-server-f6550ac6/webhooks/lenco
+
+================================================================
+
+WHERE TO ADD THIS:
+1. Go to Lenco Dashboard (https://dashboard.lenco.co)
+2. Navigate to Settings → Developers → Webhooks
+3. Click "Add Webhook" or "New Webhook"
+4. Paste the URL above
+5. Select events: Payment Success, Payment Failed, Payment Pending
+6. Save
+
+NEED HELP?
+Read: /LENCO_WEBHOOK_SETUP.md for detailed instructions
+
+================================================================

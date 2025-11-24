@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import svgPaths from "../imports/svg-hdxmv7xpz6";
 import { projectId, publicAnonKey } from "../utils/supabase/info";
+import { useAppStore } from "../stores/useAppStore";
 
 interface CheckoutService {
   id: string;
@@ -25,10 +26,60 @@ interface ProcessingPageProps {
 }
 
 /**
+ * Verify payment with Lenco API through our backend
+ */
+async function verifyLencoPayment(reference: string): Promise<{
+  success: boolean;
+  data?: any;
+  error?: string;
+}> {
+  try {
+    const response = await fetch(
+      `https://${projectId}.supabase.co/functions/v1/make-server-f6550ac6/verify-payment/${reference}`,
+      {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${publicAnonKey}`,
+        },
+      }
+    );
+
+    const result = await response.json();
+    
+    if (!response.ok) {
+      console.error("Payment verification failed:", result);
+      return { success: false, error: result.error || "Payment verification failed" };
+    }
+
+    console.log("Payment verification result:", result);
+    
+    // Check if payment status is successful
+    if (result.success && result.data?.data?.status === "successful") {
+      return { success: true, data: result.data.data };
+    }
+    
+    return { 
+      success: false, 
+      error: `Payment status: ${result.data?.data?.status || "unknown"}` 
+    };
+  } catch (error) {
+    console.error("Error verifying payment:", error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Unknown error" 
+    };
+  }
+}
+
+/**
  * Save payment to backend
  * Sends payment information to the server for storage
  */
-async function savePaymentToBackend(paymentData: ProcessingPageProps['paymentData']) {
+async function savePaymentToBackend(
+  paymentData: ProcessingPageProps['paymentData'],
+  lencoReference: string,
+  lencoData?: any
+) {
   if (!paymentData) {
     console.error("No payment data to save");
     return { success: false, error: "No payment data provided" };
@@ -49,6 +100,9 @@ async function savePaymentToBackend(paymentData: ProcessingPageProps['paymentDat
           // Extract student info from first service (all services are for same student in current flow)
           studentId: paymentData.services[0]?.id || "Unknown",
           studentName: paymentData.services[0]?.studentName || "Unknown",
+          // Add Lenco payment details
+          lencoReference: lencoReference,
+          lencoData: lencoData,
         }),
       }
     );
@@ -63,35 +117,103 @@ async function savePaymentToBackend(paymentData: ProcessingPageProps['paymentDat
     return result;
   } catch (error) {
     console.error("Error saving payment to backend:", error);
-    return { success: false, error: error.message };
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Unknown error" 
+    };
   }
 }
 
 export default function ProcessingPage({ onProcessingComplete, paymentData }: ProcessingPageProps) {
-  // Simulate payment processing and save to backend
+  const paymentReference = useAppStore((state) => state.paymentReference);
+  const [verificationStatus, setVerificationStatus] = useState<string>("Verifying payment...");
+  
+  // Check if in test mode (no backend)
+  const isTestMode = import.meta.env.VITE_TEST_MODE === 'true';
+
+  // Process payment with Lenco verification
   useEffect(() => {
     const processPayment = async () => {
-      // Simulate payment processing delay
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      // 70% chance of success, 30% chance of failure
-      const isSuccess = Math.random() > 0.3;
-      
-      // If payment succeeds, save it to backend
-      if (isSuccess && paymentData) {
-        const saveResult = await savePaymentToBackend(paymentData);
-        
-        if (!saveResult.success) {
-          console.warn("Payment succeeded but failed to save to history:", saveResult.error);
-          // We still consider the payment successful even if history save fails
+      try {
+        // TEST MODE: Skip backend verification
+        if (isTestMode) {
+          console.log('🧪 TEST MODE: Simulating payment verification');
+          setVerificationStatus("Processing payment...");
+          await new Promise(resolve => setTimeout(resolve, 2500));
+          
+          // Simulate successful payment for testing
+          setVerificationStatus("Payment successful!");
+          console.log('✅ TEST MODE: Payment reference:', paymentReference || 'MOCK_' + Date.now());
+          
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          onProcessingComplete(true);
+          return;
         }
+        
+        // PRODUCTION MODE: Full backend verification
+        // If no reference, it's a test/mock payment
+        if (!paymentReference || paymentReference === "PENDING") {
+          setVerificationStatus("Processing payment...");
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          // For demo purposes, simulate success
+          // In production, this should always verify with Lenco
+          const isSuccess = Math.random() > 0.2; // 80% success rate for testing
+          
+          if (isSuccess && paymentData) {
+            // Save mock payment to backend
+            await savePaymentToBackend(paymentData, "MOCK_" + Date.now(), null);
+          }
+          
+          onProcessingComplete(isSuccess);
+          return;
+        }
+
+        // Verify payment with Lenco
+        setVerificationStatus("Verifying with Lenco...");
+        
+        // Wait a bit for payment to be processed by Lenco
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Verify the payment
+        const verificationResult = await verifyLencoPayment(paymentReference);
+        
+        if (verificationResult.success) {
+          setVerificationStatus("Payment verified successfully!");
+          
+          // Save verified payment to backend
+          if (paymentData) {
+            const saveResult = await savePaymentToBackend(
+              paymentData, 
+              paymentReference, 
+              verificationResult.data
+            );
+            
+            if (!saveResult.success) {
+              console.warn("Payment verified but failed to save to history:", saveResult.error);
+              // We still consider the payment successful even if history save fails
+            }
+          }
+          
+          onProcessingComplete(true);
+        } else {
+          setVerificationStatus("Payment verification failed");
+          console.error("Payment verification failed:", verificationResult.error);
+          
+          // Wait a bit before showing failure
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          onProcessingComplete(false);
+        }
+      } catch (error) {
+        console.error("Error processing payment:", error);
+        setVerificationStatus("An error occurred");
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        onProcessingComplete(false);
       }
-      
-      onProcessingComplete(isSuccess);
     };
 
     processPayment();
-  }, [onProcessingComplete, paymentData]);
+  }, [onProcessingComplete, paymentData, paymentReference, isTestMode]);
 
   return (
     <div className="bg-white min-h-screen flex flex-col">
