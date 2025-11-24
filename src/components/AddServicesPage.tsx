@@ -156,17 +156,17 @@ function ServiceTable({ services, onRemoveItem }: { services: Service[]; onRemov
   const hasServices = services.length > 0;
 
   return (
-    <div className="bg-white content-stretch flex flex-col flex-1 items-start overflow-clip relative rounded-[15px] shrink-0 w-full border border-neutral-100">
+    <div className="card card-interactive content-stretch flex flex-col flex-1 items-start overflow-clip relative shrink-0 w-full animate-scale-in" style={{ animationDelay: '100ms' }}>
       {/* Header */}
-      <div className="box-border content-stretch flex h-[20px] items-center pb-0 pt-[7px] px-0 relative shrink-0 w-full">
-        <div className="box-border content-stretch flex gap-[10px] h-full items-center pb-[2px] pt-[4px] px-[10px] relative shrink-0 flex-1">
+      <div className="box-border content-stretch flex h-[32px] items-center pb-0 pt-[12px] px-[12px] relative shrink-0 w-full bg-gradient-to-b from-[#fafafa] to-white">
+        <div className="box-border content-stretch flex gap-[10px] h-full items-center pb-[2px] pt-[4px] px-[6px] relative shrink-0 flex-1">
           <div className="flex flex-col font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#7a929e] text-[8px] text-nowrap tracking-[-0.08px]">
             <p className="leading-[24px] whitespace-pre">Service Description</p>
           </div>
         </div>
         <div className="h-full relative shrink-0 w-[108px]">
           <div className="flex flex-row items-center justify-center size-full">
-            <div className="box-border content-stretch flex gap-[10px] h-full items-center justify-center p-[10px] relative w-[108px]">
+            <div className="box-border content-stretch flex gap-[10px] h-full items-center justify-center px-[10px] py-[4px] relative w-[108px]">
               <div className="flex flex-col font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] h-full justify-center leading-[0] not-italic relative shrink-0 text-[#7a929e] text-[8px] tracking-[-0.08px] w-[54px]">
                 <p className="leading-[24px]">Amount (ZMW)</p>
               </div>
@@ -174,6 +174,8 @@ function ServiceTable({ services, onRemoveItem }: { services: Service[]; onRemov
           </div>
         </div>
       </div>
+
+      <div className="divider w-full"></div>
 
       {/* Services or Empty State */}
       {!hasServices ? (
@@ -185,7 +187,13 @@ function ServiceTable({ services, onRemoveItem }: { services: Service[]; onRemov
       ) : (
         <div className="flex-1 w-full">
           {services.map((service, index) => (
-            <div key={service.id} className="box-border content-stretch flex h-[36px] items-start pl-[5px] pr-0 py-0 w-full relative">
+            <motion.div 
+              key={service.id} 
+              className="box-border content-stretch flex h-[36px] items-start pl-[5px] pr-0 py-0 w-full relative group hover:bg-gradient-to-r hover:from-[rgba(149,227,108,0.03)] hover:to-transparent transition-all duration-200"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05, duration: 0.2, ease: "easeOut" }}
+            >
               <div className="box-border content-stretch flex gap-[10px] h-full items-center p-[10px] relative shrink-0 flex-1">
                 <div className="content-stretch flex flex-col h-[26px] items-start justify-center leading-[0] not-italic relative shrink-0">
                   <div className="flex flex-col font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] h-[15px] justify-center relative shrink-0 text-[12px] text-black">
@@ -201,10 +209,13 @@ function ServiceTable({ services, onRemoveItem }: { services: Service[]; onRemov
                   <p className="leading-[1.4] whitespace-pre">K{service.amount.toLocaleString()}</p>
                 </div>
               </div>
-              <div className="absolute right-[8px] top-[11px]">
+              <div className="absolute right-[8px] top-[11px] opacity-60 group-hover:opacity-100 transition-opacity">
                 <XIcon onClick={() => onRemoveItem(service.id)} />
               </div>
-            </div>
+              {index < services.length - 1 && (
+                <div className="absolute bottom-0 left-[10px] right-[10px] h-[1px] bg-gradient-to-r from-transparent via-[rgba(0,0,0,0.06)] to-transparent"></div>
+              )}
+            </motion.div>
           ))}
         </div>
       )}
@@ -289,10 +300,13 @@ function AddSchoolFeesForm({ onDone }: { onDone: (grade: string, year: string, t
                   onClick={() => setShowGradeDropdown(false)}
                 />
                 <motion.div
-                  className="absolute z-50 w-full mt-1 bg-white border border-[#cbd2e0] rounded-[6px] shadow-lg max-h-[200px] overflow-y-auto"
+                  className="absolute z-50 w-full mt-1 glass rounded-[12px] max-h-[200px] overflow-y-auto"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
+                  style={{
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.6) inset'
+                  }}
                 >
                   {GRADE_OPTIONS.map((option) => (
                     <button
@@ -346,10 +360,13 @@ function AddSchoolFeesForm({ onDone }: { onDone: (grade: string, year: string, t
                   onClick={() => setShowYearDropdown(false)}
                 />
                 <motion.div
-                  className="absolute z-50 w-full mt-1 bg-white border border-[#cbd2e0] rounded-[6px] shadow-lg max-h-[200px] overflow-y-auto"
+                  className="absolute z-50 w-full mt-1 glass rounded-[12px] max-h-[200px] overflow-y-auto"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
+                  style={{
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.6) inset'
+                  }}
                 >
                   {YEAR_OPTIONS.map((year) => (
                     <button
@@ -403,10 +420,13 @@ function AddSchoolFeesForm({ onDone }: { onDone: (grade: string, year: string, t
                   onClick={() => setShowTermDropdown(false)}
                 />
                 <motion.div
-                  className="absolute z-50 w-full mt-1 bg-white border border-[#cbd2e0] rounded-[6px] shadow-lg max-h-[200px] overflow-y-auto"
+                  className="absolute z-50 w-full mt-1 glass rounded-[12px] max-h-[200px] overflow-y-auto"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
+                  style={{
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.6) inset'
+                  }}
                 >
                   {TERM_OPTIONS.map((term) => (
                     <button

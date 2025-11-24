@@ -1,22 +1,97 @@
 import { useEffect } from "react";
 import { motion } from "motion/react";
 import svgPaths from "../imports/svg-hdxmv7xpz6";
+import { projectId, publicAnonKey } from "../utils/supabase/info";
+
+interface CheckoutService {
+  id: string;
+  description: string;
+  amount: number;
+  invoiceNo: string;
+  studentName: string;
+}
 
 interface ProcessingPageProps {
   onProcessingComplete: (success: boolean) => void;
+  paymentData?: {
+    userPhone: string;
+    userName: string;
+    services: CheckoutService[];
+    totalAmount: number;
+    serviceFee: number;
+    finalAmount: number;
+    schoolName: string;
+  };
 }
 
-export default function ProcessingPage({ onProcessingComplete }: ProcessingPageProps) {
-  // Simulate payment processing - after 3 seconds, randomly succeed or fail
+/**
+ * Save payment to backend
+ * Sends payment information to the server for storage
+ */
+async function savePaymentToBackend(paymentData: ProcessingPageProps['paymentData']) {
+  if (!paymentData) {
+    console.error("No payment data to save");
+    return { success: false, error: "No payment data provided" };
+  }
+
+  try {
+    const response = await fetch(
+      `https://${projectId}.supabase.co/functions/v1/make-server-f6550ac6/payments`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${publicAnonKey}`,
+        },
+        body: JSON.stringify({
+          ...paymentData,
+          timestamp: new Date().toISOString(),
+          // Extract student info from first service (all services are for same student in current flow)
+          studentId: paymentData.services[0]?.id || "Unknown",
+          studentName: paymentData.services[0]?.studentName || "Unknown",
+        }),
+      }
+    );
+
+    const result = await response.json();
+    
+    if (!response.ok) {
+      console.error("Failed to save payment:", result);
+      return { success: false, error: result.error || "Failed to save payment" };
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Error saving payment to backend:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export default function ProcessingPage({ onProcessingComplete, paymentData }: ProcessingPageProps) {
+  // Simulate payment processing and save to backend
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const processPayment = async () => {
+      // Simulate payment processing delay
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
       // 70% chance of success, 30% chance of failure
       const isSuccess = Math.random() > 0.3;
+      
+      // If payment succeeds, save it to backend
+      if (isSuccess && paymentData) {
+        const saveResult = await savePaymentToBackend(paymentData);
+        
+        if (!saveResult.success) {
+          console.warn("Payment succeeded but failed to save to history:", saveResult.error);
+          // We still consider the payment successful even if history save fails
+        }
+      }
+      
       onProcessingComplete(isSuccess);
-    }, 3000);
-    
-    return () => clearTimeout(timer);
-  }, [onProcessingComplete]);
+    };
+
+    processPayment();
+  }, [onProcessingComplete, paymentData]);
 
   return (
     <div className="bg-white min-h-screen flex flex-col">

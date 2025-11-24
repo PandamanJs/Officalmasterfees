@@ -16,6 +16,7 @@ interface PayForSchoolFeesProps {
   onBack: () => void;
   onSelectServices: (selectedStudents: string[]) => void;
   students?: Student[];
+  initialSelectedStudents?: string[]; // Add prop to receive initial selections
 }
 
 function Logo() {
@@ -325,9 +326,11 @@ export default function PayForSchoolFees({
   students = [
     { name: "Talitha Kapambwe", id: "C20012", grade: "Grade 3A", balances: 0 },
     { name: "Isaiah Kapambwe", id: "C30013", grade: "Grade 4A", balances: 0 },
-  ]
+  ],
+  initialSelectedStudents = []
 }: PayForSchoolFeesProps) {
-  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+  // Initialize state with passed initial selections
+  const [selectedStudents, setSelectedStudents] = useState<string[]>(initialSelectedStudents);
 
   const toggleStudent = (studentId: string) => {
     setSelectedStudents(prev => 

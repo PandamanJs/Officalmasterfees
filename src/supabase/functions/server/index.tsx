@@ -56,6 +56,146 @@ app.get("/make-server-f6550ac6/health", (c) => {
   return c.json({ status: "ok" });
 });
 
+/**
+ * Save Payment Transaction Endpoint
+ * 
+ * Saves a completed payment transaction to the key-value store
+ * Each payment is stored with a unique key based on phone number and timestamp
+ * 
+ * @route POST /make-server-f6550ac6/payments
+ * @body {
+ *   userPhone: string,
+ *   userName: string,
+ *   studentId: string,
+ *   studentName: string,
+ *   services: Array<{id, description, amount, invoiceNo, studentName}>,
+ *   totalAmount: number,
+ *   serviceFee: number,
+ *   finalAmount: number,
+ *   schoolName: string,
+ *   timestamp: string
+ * }
+ * @returns JSON object with success status and payment ID
+ */
+app.post("/make-server-f6550ac6/payments", async (c) => {
+  try {
+    const body = await c.req.json();
+    const { 
+      userPhone, 
+      userName,
+      studentId,
+      studentName,
+      services, 
+      totalAmount, 
+      serviceFee,
+      finalAmount,
+      schoolName,
+      timestamp 
+    } = body;
+
+    // Validate required fields
+    if (!userPhone || !services || !totalAmount || !timestamp) {
+      return c.json({ 
+        success: false, 
+        error: "Missing required fields: userPhone, services, totalAmount, timestamp" 
+      }, 400);
+    }
+
+    // Generate unique payment ID
+    const paymentId = `payment_${userPhone}_${Date.now()}`;
+    
+    // Create payment record
+    const paymentRecord = {
+      id: paymentId,
+      userPhone,
+      userName: userName || "Unknown",
+      studentId: studentId || "Unknown",
+      studentName: studentName || "Unknown",
+      services,
+      totalAmount,
+      serviceFee: serviceFee || 0,
+      finalAmount: finalAmount || totalAmount,
+      schoolName: schoolName || "Unknown School",
+      timestamp,
+      status: "completed",
+      createdAt: new Date().toISOString()
+    };
+
+    // Save to key-value store with a key that allows querying by phone
+    await kv.set(`payment:${paymentId}`, paymentRecord);
+    
+    // Also add to user's payment list for easy retrieval
+    const userPaymentsKey = `user_payments:${userPhone}`;
+    const existingPayments = await kv.get(userPaymentsKey) || [];
+    const updatedPayments = [paymentId, ...existingPayments];
+    await kv.set(userPaymentsKey, updatedPayments);
+
+    console.log(`Payment saved successfully: ${paymentId} for user ${userPhone}`);
+
+    return c.json({ 
+      success: true, 
+      paymentId,
+      message: "Payment saved successfully" 
+    });
+  } catch (error) {
+    console.error("Error saving payment:", error);
+    return c.json({ 
+      success: false, 
+      error: `Failed to save payment: ${error.message}` 
+    }, 500);
+  }
+});
+
+/**
+ * Get User Payment History Endpoint
+ * 
+ * Retrieves all payment transactions for a specific user
+ * Returns payments sorted by most recent first
+ * 
+ * @route GET /make-server-f6550ac6/payments/:phone
+ * @param phone - User's phone number
+ * @returns JSON array of payment records
+ */
+app.get("/make-server-f6550ac6/payments/:phone", async (c) => {
+  try {
+    const phone = c.req.param("phone");
+    
+    if (!phone) {
+      return c.json({ 
+        success: false, 
+        error: "Phone number is required" 
+      }, 400);
+    }
+
+    // Get list of payment IDs for this user
+    const userPaymentsKey = `user_payments:${phone}`;
+    const paymentIds = await kv.get(userPaymentsKey) || [];
+
+    // Fetch all payment records
+    const payments = [];
+    for (const paymentId of paymentIds) {
+      const payment = await kv.get(`payment:${paymentId}`);
+      if (payment) {
+        payments.push(payment);
+      }
+    }
+
+    console.log(`Retrieved ${payments.length} payments for user ${phone}`);
+
+    return c.json({ 
+      success: true, 
+      payments,
+      count: payments.length
+    });
+  } catch (error) {
+    console.error("Error fetching payment history:", error);
+    return c.json({ 
+      success: false, 
+      error: `Failed to fetch payment history: ${error.message}` 
+    }, 500);
+  }
+});
+
 // Start the server
 // Note: All routes must be prefixed with /make-server-f6550ac6
 Deno.serve(app.fetch);

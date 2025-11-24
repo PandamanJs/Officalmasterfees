@@ -16,24 +16,41 @@ import DownloadReceiptPage from "./components/DownloadReceiptPage";
 import Tutorial from "./components/Tutorial";
 import { Toaster } from "./components/ui/sonner";
 import { getStudentsByPhone } from "./data/students";
-
-/**
- * Interface for checkout service items
- * Represents a single service being purchased for a student
- */
-interface CheckoutService {
-  id: string;           // Unique identifier for the service
-  description: string;  // Service name/description
-  amount: number;       // Cost in local currency
-  invoiceNo: string;    // Invoice reference number
-  studentName: string;  // Student receiving the service
-}
+import { incrementStudentSelection, incrementServiceSelection } from "./utils/preferences";
+import { useAppStore } from "./stores/useAppStore";
+import type { CheckoutService, PageType } from "./stores/useAppStore";
+import { toast } from "sonner@2.0.3";
+import chimiluteLogo from "figma:asset/6d180ec5e608f311d21d72a46c32a5b15849c39d.png";
+import julaniLogo from "figma:asset/5454374a39c6c82a13d2a4e8bc2ca0899c331fc5.png";
+import crestedCraneLogo from "figma:asset/5da21813da6fa21128f400330102b56ec04a15f5.png";
+import maarifLogo from "figma:asset/14e103bdb926a80d9f27d93b19086b97e7c47135.png";
 
 // Mock schools data - in a real app, this would come from an API
 const SCHOOLS = [
   { 
     id: 1, 
     name: "Twalumbu Educational Center",
+    logo: null,
+  },
+  { 
+    id: 2, 
+    name: "Chimilute Trust Academy",
+    logo: chimiluteLogo,
+  },
+  { 
+    id: 3, 
+    name: "Julani School",
+    logo: julaniLogo,
+  },
+  { 
+    id: 4, 
+    name: "Crested Crane Academy",
+    logo: crestedCraneLogo,
+  },
+  { 
+    id: 5, 
+    name: "International Maarif School",
+    logo: maarifLogo,
   },
 ];
 
@@ -72,6 +89,8 @@ function VuesaxLinearSearchNormal() {
  * - Real-time search filtering
  * - Click-outside to close suggestions
  * - Keyboard navigation support
+ * - Mobile-optimized with 16px font to prevent iOS zoom
+ * - Responsive touch targets (48px minimum)
  */
 function TextInput({ onSchoolSelect, selectedSchool }: { onSchoolSelect: (school: string) => void; selectedSchool: string | null }) {
   const [inputValue, setInputValue] = useState("");
@@ -111,6 +130,9 @@ function TextInput({ onSchoolSelect, selectedSchool }: { onSchoolSelect: (school
     setShowSuggestions(value.trim().length > 0);
     if (!value.trim()) {
       onSchoolSelect("");
+    } else {
+      // Clear selection when user types (they must select from dropdown)
+      onSchoolSelect("");
     }
   };
 
@@ -126,11 +148,11 @@ function TextInput({ onSchoolSelect, selectedSchool }: { onSchoolSelect: (school
   };
 
   return (
-    <div ref={containerRef} className="basis-0 bg-white grow h-full min-h-[50px] min-w-px relative rounded-[10px] shrink-0" data-name="Text Input">
-      <div aria-hidden="true" className="absolute border-[#a7aaa7] border-[0.5px] border-solid inset-0 pointer-events-none rounded-[10px]" />
+    <div ref={containerRef} className="basis-0 bg-white grow h-full min-h-[50px] min-w-px relative rounded-[14px] shrink-0 transition-all duration-200" data-name="Text Input">
+      <div aria-hidden="true" className="absolute border-[rgba(0,0,0,0.08)] border-[1px] border-solid inset-0 pointer-events-none rounded-[14px] transition-all duration-200" />
       <div className="flex flex-row items-center size-full">
-        <div className="box-border content-stretch flex gap-[24px] items-center p-[16px] relative size-full">
-          <div className="relative shrink-0 size-[20px]" data-name="search-normal">
+        <div className="box-border content-stretch flex gap-[20px] items-center p-[18px] relative size-full">
+          <div className="relative shrink-0 size-[20px] opacity-60" data-name="search-normal">
             <VuesaxLinearSearchNormal />
           </div>
           <input
@@ -140,33 +162,62 @@ function TextInput({ onSchoolSelect, selectedSchool }: { onSchoolSelect: (school
             onChange={handleInputChange}
             onFocus={() => inputValue.trim().length > 0 && setShowSuggestions(true)}
             placeholder="e.g. Twalumbu"
-            className="flex-1 bg-transparent border-none outline-none font-['IBM_Plex_Sans:Regular',sans-serif] text-[12px] text-black placeholder:text-[rgba(45,54,72,0.44)] tracking-[-0.12px] touch-manipulation"
+            className="flex-1 bg-transparent border-none outline-none font-['IBM_Plex_Sans:Regular',sans-serif] text-black placeholder:text-[rgba(45,54,72,0.4)] tracking-[-0.01em] touch-manipulation"
+            style={{ fontSize: '16px' }}
           />
         </div>
       </div>
 
-      {/* Suggestions Dropdown */}
+      {/* Suggestions Dropdown - Apple style */}
       {showSuggestions && filteredSchools.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-[4px] bg-white border border-[#a7aaa7] rounded-[10px] shadow-lg max-h-[240px] overflow-y-auto z-10">
-          {filteredSchools.map((school) => (
-            <button
+        <motion.div 
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.15 }}
+          className="absolute top-full left-0 right-0 mt-[8px] glass rounded-[14px] overflow-hidden z-10 scrollbar-thin"
+          style={{
+            maxHeight: '240px',
+            overflowY: 'auto'
+          }}
+        >
+          {filteredSchools.map((school, index) => (
+            <motion.button
               key={school.id}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.15, delay: index * 0.02 }}
               onClick={() => handleSelectSchool(school.name)}
-              className="w-full text-left px-[16px] py-[12px] font-['IBM_Plex_Sans:Regular',sans-serif] text-[12px] text-black hover:bg-[#f5f4f7] active:bg-[#e5e4e7] transition-colors touch-manipulation border-b border-[#f0f0f0] last:border-b-0"
+              className="w-full text-left px-[20px] py-[14px] font-['IBM_Plex_Sans:Regular',sans-serif] text-black hover:bg-[rgba(149,227,108,0.08)] active:bg-[rgba(149,227,108,0.15)] transition-all duration-150 touch-manipulation border-b border-[rgba(0,0,0,0.04)] last:border-b-0 flex items-center gap-[12px]"
+              style={{ fontSize: '16px', letterSpacing: '-0.01em' }}
             >
-              {school.name}
-            </button>
+              {school.logo && (
+                <img 
+                  src={school.logo} 
+                  alt={`${school.name} logo`}
+                  className="w-[32px] h-[32px] object-contain rounded-[6px] flex-shrink-0"
+                />
+              )}
+              <span className="flex-1">{school.name}</span>
+            </motion.button>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {/* No results message */}
       {showSuggestions && inputValue.trim() && filteredSchools.length === 0 && (
-        <div className="absolute top-full left-0 right-0 mt-[4px] bg-white border border-[#a7aaa7] rounded-[10px] shadow-lg z-10">
-          <div className="px-[16px] py-[12px] font-['IBM_Plex_Sans:Regular',sans-serif] text-[12px] text-[rgba(45,54,72,0.44)]">
+        <motion.div 
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute top-full left-0 right-0 mt-[8px] bg-white border border-[rgba(0,0,0,0.08)] rounded-[14px] z-10"
+          style={{
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04)'
+          }}
+        >
+          <div className="px-[20px] py-[14px] font-['IBM_Plex_Sans:Regular',sans-serif] text-[rgba(45,54,72,0.4)]" style={{ fontSize: '15px', letterSpacing: '-0.01em' }}>
             No schools found
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );
@@ -199,18 +250,32 @@ function Frame({ selectedSchool, onSchoolSelect }: { selectedSchool: string | nu
 
 function Frame3({ onProceed, hasSchool, selectedSchool, onSchoolSelect }: { onProceed: () => void; hasSchool: boolean; selectedSchool: string | null; onSchoolSelect: (school: string) => void }) {
   return (
-    <div className="content-stretch flex flex-col gap-[16px] items-start w-full px-[24px] sm:px-[48px]">
+    <div className="content-stretch flex flex-col gap-[20px] items-start w-full px-[24px] sm:px-[48px]">
       <Frame selectedSchool={selectedSchool} onSchoolSelect={onSchoolSelect} />
-      <button 
+      <motion.button 
         onClick={onProceed}
         disabled={!hasSchool}
-        className="bg-[#003630] min-h-[55px] relative rounded-[12px] shadow-[0px_6px_0px_0px_rgba(0,54,48,0.25)] shrink-0 w-full active:shadow-[0px_2px_0px_0px_rgba(0,54,48,0.25)] active:translate-y-[4px] transition-all touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed" data-name="Button">
-        <div className="flex flex-row items-center justify-center overflow-clip rounded-[inherit] size-full">
-          <div className="box-border content-stretch flex gap-[8px] min-h-[55px] items-center justify-center px-[24px] py-[16px] relative w-full">
-            <p className="font-['IBM_Plex_Sans_Devanagari:SemiBold',sans-serif] leading-[24px] not-italic relative shrink-0 text-[16px] text-nowrap text-white tracking-[-0.16px] whitespace-pre">Proceed</p>
-          </div>
+        whileHover={hasSchool ? { scale: 1.01, y: -1 } : {}}
+        whileTap={hasSchool ? { scale: 0.98, y: 1 } : {}}
+        transition={{ duration: 0.15 }}
+        className="relative min-h-[56px] w-full rounded-[14px] overflow-hidden touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed group" 
+        data-name="Button"
+        style={{
+          background: hasSchool ? 'linear-gradient(180deg, #003630 0%, #002820 100%)' : '#003630',
+          boxShadow: hasSchool 
+            ? '0 1px 2px 0 rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 4px 14px 0 rgba(0, 54, 48, 0.2)'
+            : '0 1px 2px 0 rgba(0, 0, 0, 0.1)'
+        }}
+      >
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-[0.08] transition-opacity duration-200 pointer-events-none" />
+        
+        <div className="flex flex-row items-center justify-center size-full px-[24px] py-[16px]">
+          <p className="font-['IBM_Plex_Sans_Devanagari:SemiBold',sans-serif] relative shrink-0 text-[16px] text-white tracking-[-0.01em]">
+            Proceed
+          </p>
         </div>
-      </button>
+      </motion.button>
     </div>
   );
 }
@@ -503,34 +568,47 @@ function SearchPage({ onProceed, selectedSchool, onSchoolSelect }: { onProceed: 
 }
 
 export default function Page() {
-  const [currentPage, setCurrentPage] = useState<"search" | "details" | "services" | "history" | "receipts" | "pay-fees" | "add-services" | "checkout" | "payment" | "processing" | "failed" | "success" | "download-receipt">("search");
-  const [selectedSchool, setSelectedSchool] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string>("");
-  const [userPhone, setUserPhone] = useState<string>("");
-  const [receiptStudentName, setReceiptStudentName] = useState<string>("");
-  const [receiptStudentId, setReceiptStudentId] = useState<string>("");
-  const [receiptPaymentData, setReceiptPaymentData] = useState<Record<string, PaymentData[]>>({});
-  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
-  const [checkoutServices, setCheckoutServices] = useState<CheckoutService[]>([]);
-  const [paymentAmount, setPaymentAmount] = useState<number>(0);
-  const [navigationDirection, setNavigationDirection] = useState<'forward' | 'back'>('forward');
-  const [showTutorial, setShowTutorial] = useState(false);
+  // Zustand store state
+  const currentPage = useAppStore((state) => state.currentPage);
+  const navigationDirection = useAppStore((state) => state.navigationDirection);
+  const selectedSchool = useAppStore((state) => state.selectedSchool);
+  const userName = useAppStore((state) => state.userName);
+  const userPhone = useAppStore((state) => state.userPhone);
+  const receiptStudentName = useAppStore((state) => state.receiptStudentName);
+  const receiptStudentId = useAppStore((state) => state.receiptStudentId);
+  const receiptPaymentData = useAppStore((state) => state.receiptPaymentData);
+  const selectedStudentIds = useAppStore((state) => state.selectedStudentIds);
+  const checkoutServices = useAppStore((state) => state.checkoutServices);
+  const paymentAmount = useAppStore((state) => state.paymentAmount);
+  const showTutorial = useAppStore((state) => state.showTutorial);
+  const hasSeenTutorial = useAppStore((state) => state.hasSeenTutorial);
+  
+  // Zustand store actions
+  const setNavigationDirection = useAppStore((state) => state.setNavigationDirection);
+  const setSelectedSchool = useAppStore((state) => state.setSelectedSchool);
+  const setUserInfo = useAppStore((state) => state.setUserInfo);
+  const setSelectedStudentIds = useAppStore((state) => state.setSelectedStudentIds);
+  const setCheckoutServices = useAppStore((state) => state.setCheckoutServices);
+  const setPaymentAmount = useAppStore((state) => state.setPaymentAmount);
+  const setReceiptStudent = useAppStore((state) => state.setReceiptStudent);
+  const setReceiptPaymentData = useAppStore((state) => state.setReceiptPaymentData);
+  const setShowTutorial = useAppStore((state) => state.setShowTutorial);
+  const completeTutorial = useAppStore((state) => state.completeTutorial);
+  const resetCheckoutFlow = useAppStore((state) => state.resetCheckoutFlow);
 
   // Check if user has seen tutorial on mount
   useEffect(() => {
-    const hasSeenTutorial = localStorage.getItem('hasSeenTutorial');
     if (!hasSeenTutorial) {
       setShowTutorial(true);
     }
-  }, []);
+  }, [hasSeenTutorial, setShowTutorial]);
 
   const handleTutorialComplete = () => {
-    localStorage.setItem('hasSeenTutorial', 'true');
-    setShowTutorial(false);
+    completeTutorial();
   };
 
   // Navigation helper to push to history and update page
-  const navigateToPage = (page: typeof currentPage, replaceHistory = false) => {
+  const navigateToPage = (page: PageType, replaceHistory = false) => {
     setNavigationDirection('forward');
     const state = { page };
     if (replaceHistory) {
@@ -538,19 +616,19 @@ export default function Page() {
     } else {
       window.history.pushState(state, '', `#${page}`);
     }
-    setCurrentPage(page);
+    useAppStore.setState({ currentPage: page });
   };
 
   // Initialize history on mount
   useEffect(() => {
     // Check if there's a hash in the URL on initial load
     const hash = window.location.hash.slice(1);
-    const validPages = ['search', 'details', 'services', 'history', 'receipts', 'pay-fees', 'add-services', 'checkout', 'payment', 'processing', 'failed', 'success', 'download-receipt'];
+    const validPages: PageType[] = ['search', 'details', 'services', 'history', 'receipts', 'pay-fees', 'add-services', 'checkout', 'payment', 'processing', 'failed', 'success', 'download-receipt'];
     
-    if (hash && validPages.includes(hash)) {
+    if (hash && validPages.includes(hash as PageType)) {
       // If there's a valid hash, use it
       window.history.replaceState({ page: hash }, '', `#${hash}`);
-      setCurrentPage(hash as typeof currentPage);
+      useAppStore.setState({ currentPage: hash as PageType });
     } else {
       // Otherwise, start at search
       window.history.replaceState({ page: 'search' }, '', '#search');
@@ -558,24 +636,43 @@ export default function Page() {
 
     // Handle browser back/forward buttons and swipe gestures
     const handlePopState = (event: PopStateEvent) => {
+      const targetPage = event.state?.page as PageType;
+      const currentPageValue = useAppStore.getState().currentPage;
+      
+      // Prevent backward navigation from success or download-receipt pages
+      if (currentPageValue === 'success' || currentPageValue === 'download-receipt') {
+        event.preventDefault();
+        window.history.pushState({ page: currentPageValue }, '', `#${currentPageValue}`);
+        return;
+      }
+      
+      // Prevent navigation to processing page via back button
+      if (targetPage === 'processing') {
+        event.preventDefault();
+        window.history.forward();
+        return;
+      }
+      
       setNavigationDirection('back');
-      if (event.state && event.state.page) {
-        setCurrentPage(event.state.page);
+      if (targetPage) {
+        useAppStore.setState({ currentPage: targetPage });
       } else {
-        // If there's no state, go back to search
-        setCurrentPage('search');
+        useAppStore.setState({ currentPage: 'search' });
       }
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  }, []); // Remove currentPage from dependencies
 
   // Prevent accidental navigation away from app
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      const currentPageValue = useAppStore.getState().currentPage;
+      const selectedSchoolValue = useAppStore.getState().selectedSchool;
+      
       // Only show confirmation if user has navigated beyond search page
-      if (currentPage !== 'search' && selectedSchool) {
+      if (currentPageValue !== 'search' && selectedSchoolValue) {
         e.preventDefault();
         e.returnValue = '';
       }
@@ -583,7 +680,7 @@ export default function Page() {
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [currentPage, selectedSchool]);
+  }, []);
 
   // Add a safety entry to history to prevent closing app on back gesture from search
   useEffect(() => {
@@ -592,30 +689,21 @@ export default function Page() {
     }
   }, [currentPage]);
 
-  // Apply 12% zoom for Chrome on Android
-  useEffect(() => {
-    const userAgent = navigator.userAgent.toLowerCase();
-    const isChromeAndroid = /chrome/.test(userAgent) && /android/.test(userAgent);
-    
-    if (isChromeAndroid) {
-      document.body.style.zoom = '1.12';
-    }
-
-    return () => {
-      // Cleanup on unmount
-      document.body.style.zoom = '1';
-    };
-  }, []);
-
   const handleProceed = () => {
     if (selectedSchool) {
       navigateToPage("details");
+    } else {
+      // Safety check: show error if user somehow clicks without selection
+      toast.error("Please select a school", {
+        description: "You must select a school before proceeding.",
+        duration: 3000,
+      });
+      console.log("Proceed blocked - No school selected. Current state:", { selectedSchool });
     }
   };
 
   const handleProceedToServices = (name: string, phone: string) => {
-    setUserName(name);
-    setUserPhone(phone);
+    setUserInfo(name, phone);
     navigateToPage("services");
   };
 
@@ -633,6 +721,8 @@ export default function Page() {
   };
 
   const handleBackToServices = () => {
+    // Clear selections when going back to services dashboard
+    resetCheckoutFlow();
     window.history.back();
   };
 
@@ -641,8 +731,7 @@ export default function Page() {
     studentId: string,
     paymentData: Record<string, PaymentData[]>
   ) => {
-    setReceiptStudentName(studentName);
-    setReceiptStudentId(studentId);
+    setReceiptStudent(studentName, studentId);
     setReceiptPaymentData(paymentData);
     navigateToPage("receipts");
   };
@@ -652,7 +741,6 @@ export default function Page() {
   };
 
   const handleServiceSelect = (service: string) => {
-    console.log("Selected service:", service);
     // Future: Navigate to specific service pages
   };
 
@@ -661,22 +749,25 @@ export default function Page() {
   };
 
   const handleSelectServices = (selectedStudents: string[]) => {
-    console.log("Selected students:", selectedStudents);
+    // Track student selections in preferences
+    selectedStudents.forEach(studentId => {
+      incrementStudentSelection(studentId);
+    });
+    
     setSelectedStudentIds(selectedStudents);
     navigateToPage("add-services");
   };
 
   const handleBackToPayFees = () => {
+    // Don't clear selectedStudentIds - preserve selections when going back
     window.history.back();
   };
 
   const handleNextFromAddServices = () => {
-    console.log("Proceeding to next step...");
     window.history.back();
   };
 
   const handleCheckout = (services: CheckoutService[]) => {
-    console.log("Proceeding to checkout with services:", services);
     setCheckoutServices(services);
     navigateToPage("checkout");
   };
@@ -686,7 +777,6 @@ export default function Page() {
   };
 
   const handleCheckoutProceed = (amount: number) => {
-    console.log("Proceeding to payment page with amount:", amount);
     setPaymentAmount(amount);
     navigateToPage("payment");
   };
@@ -696,33 +786,37 @@ export default function Page() {
   };
 
   const handlePaymentComplete = () => {
-    console.log("Processing payment...");
     navigateToPage("processing");
   };
 
   const handleProcessingComplete = (success: boolean) => {
     if (success) {
-      navigateToPage("success", true); // Replace history to prevent going back to processing
+      // Replace processing page in history to prevent back navigation
+      navigateToPage("success", true);
     } else {
-      navigateToPage("failed", true); // Replace history to prevent going back to processing
+      // Replace processing page in history to prevent back navigation
+      navigateToPage("failed", true);
     }
   };
 
   const handleTryAgain = () => {
+    // On payment failure, go back to payment page
     window.history.back();
   };
 
   const handleViewReceiptsFromSuccess = () => {
-    navigateToPage("download-receipt");
+    // After successful payment, user can view receipts
+    // This replaces the success page to prevent going back
+    navigateToPage("download-receipt", true);
   };
 
   const handleDownloadReceipts = () => {
     // PDF generation will be handled in DownloadReceiptPage
-    console.log("Download receipts triggered");
   };
 
   const handleGoHome = () => {
-    // Navigate home and clear history stack
+    // Navigate home and clear the payment flow from history
+    // This replaces the current page to prevent back navigation
     navigateToPage("services", true);
   };
 
@@ -809,6 +903,15 @@ export default function Page() {
           >
             <ProcessingPage
               onProcessingComplete={handleProcessingComplete}
+              paymentData={{
+                userPhone,
+                userName,
+                services: checkoutServices,
+                totalAmount: paymentAmount,
+                serviceFee: paymentAmount * 0.02, // 2% service fee
+                finalAmount: paymentAmount + (paymentAmount * 0.02),
+                schoolName: selectedSchool || "Twalumbu Educational Center",
+              }}
             />
           </motion.div>
         )}
@@ -875,6 +978,7 @@ export default function Page() {
               onBack={handleBackToServices}
               onSelectServices={handleSelectServices}
               students={getStudentsByPhone(userPhone)}
+              initialSelectedStudents={selectedStudentIds}
             />
           </motion.div>
         )}

@@ -199,10 +199,10 @@ function PageGroup2({ onBack }: { onBack: () => void }) {
 
 function Frame2({ onPayFees }: { onPayFees?: () => void }) {
   return (
-    <div className="content-stretch flex gap-[15px] h-[44px] items-start relative shrink-0 w-full">
+    <div className="content-stretch flex gap-[15px] h-[44px] items-start relative shrink-0 w-full animate-fade-in" style={{ animationDelay: '100ms' }}>
       <button
         onClick={onPayFees}
-        className="bg-[#003630] box-border content-stretch flex gap-[8px] items-center justify-center overflow-clip px-[24px] py-[10px] relative rounded-[12px] shrink-0 w-[297px] touch-manipulation active:scale-[0.98] transition-transform" 
+        className="btn-dark box-border content-stretch flex gap-[8px] items-center justify-center overflow-clip px-[24px] py-[10px] relative shrink-0 w-[297px] touch-manipulation" 
         data-name="Button"
       >
         <p className="font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] leading-[24px] not-italic relative shrink-0 text-[15px] text-nowrap text-white tracking-[-0.15px] whitespace-pre">Pay for School Fees</p>
@@ -213,10 +213,10 @@ function Frame2({ onPayFees }: { onPayFees?: () => void }) {
 
 function Frame3({ onViewHistory }: { onViewHistory: () => void }) {
   return (
-    <div className="content-stretch flex gap-[15px] h-[43px] items-start relative shrink-0 w-full">
+    <div className="content-stretch flex gap-[15px] h-[43px] items-start relative shrink-0 w-full animate-fade-in" style={{ animationDelay: '200ms' }}>
       <button
         onClick={onViewHistory}
-        className="basis-0 grow min-h-px min-w-px relative rounded-[12px] shrink-0 touch-manipulation active:bg-[#f5f4f7] transition-colors" 
+        className="btn-ghost basis-0 grow min-h-px min-w-px relative shrink-0 touch-manipulation" 
         data-name="Button"
       >
         <div className="flex flex-row items-center justify-center overflow-clip rounded-[inherit] size-full">
@@ -231,10 +231,10 @@ function Frame3({ onViewHistory }: { onViewHistory: () => void }) {
 
 function Frame4({ onSelectService }: { onSelectService: (service: string) => void }) {
   return (
-    <div className="content-stretch flex gap-[15px] h-[44px] items-start relative shrink-0 w-full">
+    <div className="content-stretch flex gap-[15px] h-[44px] items-start relative shrink-0 w-full animate-fade-in" style={{ animationDelay: '300ms' }}>
       <button
         onClick={() => onSelectService("payment-plans")}
-        className="basis-0 grow min-h-px min-w-px relative rounded-[12px] shrink-0 touch-manipulation active:bg-[#f5f4f7] transition-colors" 
+        className="btn-ghost basis-0 grow min-h-px min-w-px relative shrink-0 touch-manipulation" 
         data-name="Button"
       >
         <div className="flex flex-row items-center justify-center overflow-clip rounded-[inherit] size-full">

@@ -1,23 +1,51 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import svgPaths from "../imports/svg-cw21sj30t4";
 import headerSvgPaths from "../imports/svg-co0ktog99f";
 import { toast } from "sonner@2.0.3";
 import { ChevronDown } from "lucide-react";
 import imgTecLogo from "figma:asset/ec5fcf89fe0a77803b7cefd4250b03424564bb63.png";
+import chimiluteLogo from "figma:asset/6d180ec5e608f311d21d72a46c32a5b15849c39d.png";
+import julaniLogo from "figma:asset/5454374a39c6c82a13d2a4e8bc2ca0899c331fc5.png";
+import crestedCraneLogo from "figma:asset/5da21813da6fa21128f400330102b56ec04a15f5.png";
+import maarifLogo from "figma:asset/14e103bdb926a80d9f27d93b19086b97e7c47135.png";
+import { getLastPhone, saveLastPhone } from "../utils/preferences";
 
+/**
+ * Component Props Interface
+ * Defines the contract for this component's API
+ */
 interface SchoolDetailsPageProps {
-  schoolName: string;
-  onProceed: (userName: string, userPhone: string) => void;
-  onBack: () => void;
+  schoolName: string;  // Name of the selected school
+  onProceed: (userName: string, userPhone: string) => void;  // Callback when validation succeeds
+  onBack: () => void;  // Callback for back navigation
 }
 
-// School logo configuration - matches schools from App.tsx
+/**
+ * School Logo Configuration
+ * Maps school names to their respective logo image paths
+ * 
+ * Usage: SCHOOL_LOGOS["School Name"] => image path
+ * Format: "School Name": importedImagePath
+ */
 const SCHOOL_LOGOS: Record<string, string> = {
   "Twalumbu Educational Center": imgTecLogo,
-  // Add more schools here as needed
+  "Chimilute Trust Academy": chimiluteLogo,
+  "Julani School": julaniLogo,
+  "Crested Crane Academy": crestedCraneLogo,
+  "International Maarif School": maarifLogo,
 };
 
+/**
+ * Logo Component
+ * Renders the Master-Fees diamond checkmark logo in the header
+ * 
+ * @param {object} props - Component props
+ * @param {string} props.schoolName - Name of the selected school (reserved for future use)
+ * @returns {JSX.Element} SVG logo with drop shadow filter
+ * 
+ * Visual: Black diamond with green checkmark stroke
+ */
 function Logo({ schoolName }: { schoolName: string }) {
   const logoPath = SCHOOL_LOGOS[schoolName];
   return (
@@ -81,16 +109,12 @@ function SchoolTitle({ schoolName }: { schoolName: string }) {
             className="flex justify-center items-center"
             data-name="School Logo"
           >
-            <div className="box-border content-stretch flex gap-[8px] h-[80px] items-center justify-center px-[10px] py-[10px] w-[136px]">
-              <div className="h-[126px] relative shrink-0 w-[115px]">
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                  <img 
-                    alt={`${schoolName} Logo`} 
-                    className="absolute h-[100.61%] left-[-15.25%] max-w-none top-[-0.31%] w-[285.53%] object-contain" 
-                    src={logoPath} 
-                  />
-                </div>
-              </div>
+            <div className="w-[120px] h-[120px] flex items-center justify-center">
+              <img 
+                alt={`${schoolName} Logo`} 
+                className="max-w-[100px] max-h-[100px] object-contain" 
+                src={logoPath} 
+              />
             </div>
           </motion.div>
         )}
@@ -100,10 +124,10 @@ function SchoolTitle({ schoolName }: { schoolName: string }) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="font-['Inter:Regular',sans-serif] font-normal leading-[28px] not-italic text-[0px] text-black text-center w-full max-w-[286px]"
+          className="font-['Inter:Regular',sans-serif] font-normal leading-[28px] not-italic text-[0px] text-black text-center w-full max-w-[340px]"
         >
           <p className="font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] mb-0 text-[12px]">Pay School fees for</p>
-          <p className="font-['IBM_Plex_Sans_Devanagari:Bold',sans-serif] text-[24px]">{schoolName}</p>
+          <p className="font-['IBM_Plex_Sans_Devanagari:Bold',sans-serif] text-[24px] leading-[32px]">{schoolName}</p>
         </motion.div>
       </div>
     </div>
@@ -197,6 +221,10 @@ function TextInput({ onValidationChange }: TextInputProps) {
   const handleBlur = () => {
     if (inputValue) {
       const userName = validatePhoneNumber(inputValue);
+      if (userName) {
+        // Save phone number to localStorage on successful validation
+        saveLastPhone(inputValue.replace(/\D/g, ""));
+      }
       onValidationChange(!!userName, inputValue, userName || "");
     }
   };

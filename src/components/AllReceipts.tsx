@@ -343,8 +343,7 @@ export default function AllReceipts({
         </div>
 
         {/* Content */}
-        <div className="relative px-[16px] py-[24px] overflow-y-auto bg-[#f5f4f7]" style={{ height: 'calc(100vh - 60px)' }}>
-          <AnimatedBackground />
+        <div className="relative px-[16px] py-[24px] overflow-y-auto bg-white" style={{ height: 'calc(100vh - 60px)' }}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

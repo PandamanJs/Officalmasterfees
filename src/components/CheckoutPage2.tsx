@@ -119,22 +119,38 @@ function StudentServiceGroup({
   onAmountChange: (serviceId: string, value: number) => void;
 }) {
   return (
-    <div className="w-full">
-      <div className="mb-3">
-        <p className="font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] text-[10px] text-[#003630]">{studentName}</p>
+    <div className="w-full animate-fade-in" style={{ animationDelay: '100ms' }}>
+      <div className="mb-3 flex items-center gap-2">
+        <div className="h-[2px] w-[8px] bg-gradient-to-r from-[#95e36c] to-transparent rounded-full"></div>
+        <p className="font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] text-[10px] text-[#003630] tracking-wide uppercase">
+          {studentName}
+        </p>
       </div>
-      <div className="bg-[#f8f9fa] rounded-lg p-3 space-y-3">
-        {services.map((service) => (
-          <div key={service.id} className="bg-white rounded-lg p-3 shadow-sm">
+      <div className="glass-light rounded-[12px] p-3 space-y-3" 
+        style={{
+          background: 'linear-gradient(135deg, rgba(248, 249, 250, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%)',
+          border: '1px solid rgba(149, 227, 108, 0.1)'
+        }}>
+        {services.map((service, index) => (
+          <div 
+            key={service.id} 
+            className="card card-interactive rounded-[10px] p-3 animate-fade-in group"
+            style={{ 
+              animationDelay: `${150 + index * 50}ms`,
+              background: 'white'
+            }}
+          >
             <ServiceItem 
               description={service.description}
               amount={service.amount}
             />
-            <AmountInput 
-              serviceId={service.id}
-              value={inputAmounts[service.id] || 0}
-              onChange={onAmountChange}
-            />
+            <div className="mt-2 pt-2 border-t border-gradient">
+              <AmountInput 
+                serviceId={service.id}
+                value={inputAmounts[service.id] || 0}
+                onChange={onAmountChange}
+              />
+            </div>
           </div>
         ))}
       </div>

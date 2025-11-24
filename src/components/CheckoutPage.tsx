@@ -187,16 +187,35 @@ function Frame12({ services }: { services: Service[] }) {
   const total = services.reduce((sum, service) => sum + service.amount, 0);
   
   return (
-    <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full overflow-y-auto max-h-[180px]">
-      {services.map((service) => (
-        <ServiceItem 
+    <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full overflow-y-auto max-h-[180px] scrollbar-thin animate-fade-in pr-[4px]" 
+      style={{ 
+        animationDelay: '100ms',
+        scrollbarWidth: 'thin',
+        scrollbarColor: 'rgba(149, 227, 108, 0.3) transparent'
+      }}>
+      {/* Scroll fade indicator - top */}
+      <div className="sticky top-0 left-0 right-0 h-[12px] pointer-events-none z-10 bg-gradient-to-b from-white to-transparent"></div>
+      
+      {services.map((service, index) => (
+        <div
           key={service.id}
-          studentName={service.studentName}
-          description={service.description}
-          amount={service.amount}
-        />
+          className="animate-fade-in w-full"
+          style={{ animationDelay: `${150 + index * 50}ms` }}
+        >
+          <ServiceItem 
+            studentName={service.studentName}
+            description={service.description}
+            amount={service.amount}
+          />
+        </div>
       ))}
-      <Frame7 total={total} />
+      
+      <div className="animate-fade-in w-full" style={{ animationDelay: `${150 + services.length * 50}ms` }}>
+        <Frame7 total={total} />
+      </div>
+      
+      {/* Scroll fade indicator - bottom */}
+      <div className="sticky bottom-0 left-0 right-0 h-[12px] pointer-events-none z-10 bg-gradient-to-t from-white to-transparent"></div>
     </div>
   );
 }
@@ -244,7 +263,11 @@ function Frame5() {
 
 function Frame2({ services, paymentAmount, onAmountChange, onProceed, onPayInPart }: { services: Service[]; paymentAmount: string; onAmountChange: (value: string) => void; onProceed: () => void; onPayInPart: () => void }) {
   return (
-    <div className="absolute bg-white box-border content-stretch flex flex-col gap-[16px] h-[444px] items-start left-[calc(50%+0.5px)] pb-[30px] pt-[20px] px-[25px] rounded-[20px] top-[157px] translate-x-[-50%] w-[346px]">
+    <div className="absolute glass box-border content-stretch flex flex-col gap-[16px] h-[444px] items-start left-[calc(50%+0.5px)] pb-[30px] pt-[20px] px-[25px] rounded-[20px] top-[157px] translate-x-[-50%] w-[346px]"
+      style={{
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.6) inset'
+      }}
+    >
       <div className="overflow-clip relative shrink-0 size-[24px]" data-name="Interface / Shopping_Bag_01">
         <div className="absolute inset-[16.67%_12.5%]" data-name="Vector">
           <div className="absolute inset-[-6.25%_-5.56%]" style={{ "--stroke-0": "rgba(0, 0, 0, 1)" } as React.CSSProperties}>

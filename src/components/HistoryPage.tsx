@@ -1,13 +1,24 @@
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import svgPaths from "../imports/svg-g99px4v16h";
 import headerSvgPaths from "../imports/svg-co0ktog99f";
 import pathSvgPaths from "../imports/svg-d7byi594ix";
 import pathStrokeSvgPaths from "../imports/svg-zrcfpc6p5c";
+import treeSvgPaths from "../imports/svg-e66apwwrzk";
 import { getStudentsByPhone } from "../data/students";
 import { generateReceiptPDF } from "../utils/pdfGenerator";
 import { toast } from "sonner@2.0.3";
 import { Toaster } from "./ui/sonner";
+import { projectId, publicAnonKey } from "../utils/supabase/info";
+
+export interface PaymentReceipt {
+  date: string;
+  day: string;
+  receiptNo: string;
+  paymentMethod: string;
+  amount: string;
+  balanceAfter: string;
+}
 
 export interface PaymentData {
   date: string;
@@ -15,6 +26,10 @@ export interface PaymentData {
   title: string;
   subtitle: string;
   amount: string;
+  invoiceNo?: string;
+  termInfo?: string;
+  currentBalance?: string;
+  receipts?: PaymentReceipt[];
 }
 
 interface HistoryPageProps {
@@ -134,7 +149,7 @@ function PaymentPopup({
 
     try {
       // Extract receipt number from subtitle
-      const receiptNumberMatch = paymentData.subtitle.match(/Receipt No\\.\\s*(\\d+)/);
+      const receiptNumberMatch = paymentData.subtitle.match(/Receipt No\\.\\s*(\d+)/);
       const receiptNumber = receiptNumberMatch ? receiptNumberMatch[1] : "0000";
       
       // Parse amount - remove "K" prefix and parse as number
@@ -240,6 +255,8 @@ function PaymentItem({
   subtitle, 
   amount,
   onMenuClick,
+  termInfo,
+  currentBalance,
 }: { 
   date: string; 
   day: string; 
@@ -247,6 +264,8 @@ function PaymentItem({
   subtitle: string; 
   amount: string;
   onMenuClick?: () => void;
+  termInfo?: string;
+  currentBalance?: string;
 }) {
   return (
     <div className="flex items-center justify-between w-full px-[12px] py-[10px]">
@@ -258,19 +277,84 @@ function PaymentItem({
           {day}
         </div>
       </div>
-      <div className="flex gap-[25px] items-start flex-1 ml-[12px]">
+      <div className="flex gap-[20px] items-start flex-1 ml-[12px]">
         <div className="flex flex-col gap-[2px] flex-1">
           <div className="font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] text-[14px] text-black tracking-[-0.14px] leading-[15px]">
             {title}
           </div>
-          <div className="font-['Inter:Medium',sans-serif] text-[8px] text-[#a7aaa7] tracking-[-0.08px] leading-[15px]">
-            {subtitle}
-          </div>
+          {termInfo && currentBalance ? (
+            <div className="flex gap-[10px] font-['Inter:Medium',sans-serif] text-[8px] text-neutral-900 tracking-[-0.08px] leading-[15px]">
+              <span>{termInfo}</span>
+              <span>{currentBalance}</span>
+            </div>
+          ) : (
+            <div className="font-['Inter:Medium',sans-serif] text-[8px] text-[#a7aaa7] tracking-[-0.08px] leading-[15px]">
+              {subtitle}
+            </div>
+          )}
         </div>
         <div className="font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] text-[14px] text-black tracking-[-0.14px] leading-[15px] whitespace-nowrap">
           {amount}
         </div>
         <MenuMoreVertical className="overflow-clip relative shrink-0 size-[20px]" onClick={onMenuClick} />
+      </div>
+    </div>
+  );
+}
+
+function PaymentReceiptItem({
+  date,
+  day,
+  receiptNo,
+  paymentMethod,
+  amount,
+  balanceAfter,
+  onMenuClick,
+}: {
+  date: string;
+  day: string;
+  receiptNo: string;
+  paymentMethod: string;
+  amount: string;
+  balanceAfter: string;
+  onMenuClick?: () => void;
+}) {
+  return (
+    <div className="flex gap-[4px] items-end w-full">
+      {/* Tree connector line */}
+      <div className="h-[57px] relative shrink-0 w-[42px]">
+        <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 42 57">
+          <g id="Frame 1707478934">
+            <path d="M10 12V45H32" id="Vector 1" stroke="var(--stroke-0, black)" />
+          </g>
+        </svg>
+      </div>
+
+      {/* Receipt content */}
+      <div className="flex gap-[19px] items-center flex-1">
+        <div className="flex flex-col gap-[2px] items-center size-[18px] shrink-0">
+          <div className="font-['Inter:Light',sans-serif] h-[8px] text-[8px] tracking-[-0.08px] text-black leading-[15px]">
+            {date}
+          </div>
+          <div className="font-['Inter:Medium',sans-serif] h-[8px] text-[12px] tracking-[-0.12px] text-black leading-[15px]">
+            {day}
+          </div>
+        </div>
+
+        <div className="flex gap-[23px] items-start flex-1">
+          <div className="flex flex-col gap-[2px] flex-1">
+            <div className="font-['IBM_Plex_Sans_Devanagari:Light',sans-serif] text-[10px] text-black tracking-[-0.1px] leading-[15px]">
+              {receiptNo} - {paymentMethod}
+            </div>
+            <div className="font-['Inter:Light',sans-serif] text-[8px] text-neutral-900 tracking-[-0.08px] leading-[15px]">
+              Balance after payment: {balanceAfter}
+            </div>
+          </div>
+          <div className="font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] text-[12px] text-black tracking-[-0.12px] leading-[15px] whitespace-nowrap">
+            {amount}
+          </div>
+          <MenuMoreVertical className="overflow-clip relative shrink-0 size-[20px]" onClick={onMenuClick} />
+        </div>
       </div>
     </div>
   );
@@ -415,6 +499,91 @@ export default function HistoryPage({ userName, userPhone, onBack, onViewAllRece
   const [openPopupId, setOpenPopupId] = useState<string | null>(null);
   const [selectedStudentId, setSelectedStudentId] = useState<string>(students[0]?.id || "C20012");
   const [selectedPayment, setSelectedPayment] = useState<PaymentData | null>(null);
+  const [allPaymentData, setAllPaymentData] = useState<Record<string, Record<string, PaymentData[]>>>({});
+  const [isLoading, setIsLoading] = useState(true);
+
+  /**
+   * Fetch payment history from backend
+   * Transforms backend data into UI-friendly format
+   */
+  useEffect(() => {
+    const fetchPaymentHistory = async () => {
+      if (!userPhone) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `https://${projectId}.supabase.co/functions/v1/make-server-f6550ac6/payments/${userPhone}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${publicAnonKey}`,
+            },
+          }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          console.error("Failed to fetch payment history:", result);
+          // Load demo data if backend fails
+          setAllPaymentData(getDemoPaymentData());
+          setIsLoading(false);
+          return;
+        }
+
+        // Transform backend payment data to UI format
+        const groupedData: Record<string, Record<string, PaymentData[]>> = {};
+
+        result.payments.forEach((payment: any) => {
+          const date = new Date(payment.timestamp);
+          const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'short' });
+          const dayOfMonth = date.getDate().toString();
+          const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+
+          // Group services by student ID
+          payment.services.forEach((service: any) => {
+            // Extract student ID from service (assuming format "StudentName - StudentID")
+            const studentId = payment.studentId || "Unknown";
+            
+            if (!groupedData[studentId]) {
+              groupedData[studentId] = {};
+            }
+            
+            if (!groupedData[studentId][monthKey]) {
+              groupedData[studentId][monthKey] = [];
+            }
+
+            // Create payment entry
+            const paymentEntry: PaymentData = {
+              date: dayOfWeek,
+              day: dayOfMonth,
+              title: `Paid ${service.description}`,
+              subtitle: `Receipt No. ${service.invoiceNo}`,
+              amount: `K${service.amount.toLocaleString()}`,
+            };
+
+            groupedData[studentId][monthKey].push(paymentEntry);
+          });
+        });
+
+        // Merge with demo data to show examples
+        const mergedData = { ...getDemoPaymentData(), ...groupedData };
+        setAllPaymentData(mergedData);
+      } catch (error) {
+        console.error("Error fetching payment history:", error);
+        // Load demo data on error
+        setAllPaymentData(getDemoPaymentData());
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPaymentHistory();
+  }, [userPhone]);
 
   const handleViewReceipt = () => {
     setOpenPopupId(null);
@@ -448,91 +617,6 @@ export default function HistoryPage({ userName, userPhone, onBack, onViewAllRece
     return months;
   };
 
-  // Payment data grouped by student ID and month key
-  const allPaymentData: Record<string, Record<string, Array<{
-    date: string;
-    day: string;
-    title: string;
-    subtitle: string;
-    amount: string;
-  }>>> = {
-    'C20012': {
-      '2025-10': [
-        {
-          date: 'Wed',
-          day: '19',
-          title: 'Paid School Fees - Grade 3B',
-          subtitle: 'Term 1 2025 (Balance payment) - Receipt No. 00352',
-          amount: 'K150',
-        },
-      ],
-      '2025-9': [],
-      '2025-8': [
-        {
-          date: 'Fri',
-          day: '10',
-          title: 'Paid Bus Fare - ZNS Bus Station',
-          subtitle: 'Term 1 2025 (Full Payment) - Receipt No. 00201',
-          amount: 'K750',
-        },
-        {
-          date: 'Wed',
-          day: '08',
-          title: 'Paid School Fees - Grade 2B',
-          subtitle: 'Term 3 2024 (Balance payment) - Receipt No. 00155',
-          amount: 'K750',
-        },
-      ],
-    },
-    'C30013': {
-      '2025-10': [],
-      '2025-9': [
-        {
-          date: 'Fri',
-          day: '22',
-          title: 'Paid School Fees - Grade 4A',
-          subtitle: 'Term 1 2025 (Partial Payment) - Receipt No. 00310',
-          amount: 'K450',
-        },
-      ],
-      '2025-8': [],
-    },
-    'C20013': {
-      '2025-10': [
-        {
-          date: 'Mon',
-          day: '17',
-          title: 'Paid School Fees - Grade 5A',
-          subtitle: 'Term 1 2025 (Full Payment) - Receipt No. 00360',
-          amount: 'K300',
-        },
-      ],
-      '2025-9': [
-        {
-          date: 'Thu',
-          day: '12',
-          title: 'Paid Lab Fees - Science Department',
-          subtitle: 'Term 4 2024 (Full Payment) - Receipt No. 00290',
-          amount: 'K120',
-        },
-      ],
-      '2025-8': [],
-    },
-    'C20014': {
-      '2025-10': [],
-      '2025-9': [],
-      '2025-8': [
-        {
-          date: 'Tue',
-          day: '05',
-          title: 'Paid School Fees - Grade 6B',
-          subtitle: 'Term 3 2024 (Balance payment) - Receipt No. 00180',
-          amount: 'K200',
-        },
-      ],
-    },
-  };
-
   const paymentsByMonth = allPaymentData[selectedStudentId] || {};
 
   const lastThreeMonths = getLastThreeMonths();
@@ -540,7 +624,6 @@ export default function HistoryPage({ userName, userPhone, onBack, onViewAllRece
   return (
     <div className="bg-white min-h-screen w-full overflow-hidden flex items-center justify-center">
       <div className="relative w-full max-w-[393px] md:max-w-[500px] lg:max-w-[600px] min-h-screen mx-auto">
-        <AnimatedBackground />
         
         {/* Header */}
         <div className="relative h-[60px] w-full">
@@ -584,19 +667,47 @@ export default function HistoryPage({ userName, userPhone, onBack, onViewAllRece
                   <>
                     {payments.map((payment, index) => {
                       const paymentId = `${month.key}-${index}`;
+                      const hasReceipts = payment.receipts && payment.receipts.length > 0;
+                      
                       return (
                         <div key={index}>
+                          {/* Main Invoice/Payment Item */}
                           <PaymentItem
                             date={payment.date}
                             day={payment.day}
                             title={payment.title}
                             subtitle={payment.subtitle}
                             amount={payment.amount}
+                            termInfo={payment.termInfo}
+                            currentBalance={payment.currentBalance}
                             onMenuClick={() => {
                               setOpenPopupId(paymentId);
                               setSelectedPayment(payment);
                             }}
                           />
+                          
+                          {/* Receipt Sub-items with Tree Lines */}
+                          {hasReceipts && payment.receipts!.map((receipt, receiptIndex) => (
+                            <PaymentReceiptItem
+                              key={receiptIndex}
+                              date={receipt.date}
+                              day={receipt.day}
+                              receiptNo={receipt.receiptNo}
+                              paymentMethod={receipt.paymentMethod}
+                              amount={receipt.amount}
+                              balanceAfter={receipt.balanceAfter}
+                              onMenuClick={() => {
+                                setOpenPopupId(`${paymentId}-receipt-${receiptIndex}`);
+                                setSelectedPayment({
+                                  ...payment,
+                                  title: receipt.receiptNo,
+                                  subtitle: receipt.paymentMethod,
+                                  amount: receipt.amount,
+                                });
+                              }}
+                            />
+                          ))}
+                          
                           {index < payments.length - 1 && (
                             <div className="h-[1px] bg-[#f5f4f7] mx-[22px]" />
                           )}
@@ -635,3 +746,243 @@ export default function HistoryPage({ userName, userPhone, onBack, onViewAllRece
     </div>
   );
 }
+
+/**
+ * Demo payment data showcasing hierarchical structure
+ * Shows invoices with multiple receipt payments
+ */
+const getDemoPaymentData = (): Record<string, Record<string, PaymentData[]>> => {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+  
+  return {
+    'C20012': {
+      [`${currentYear}-${currentMonth}`]: [
+        {
+          date: 'Wed',
+          day: '19',
+          title: 'School Fees - Grade 3B',
+          subtitle: 'Invoice No. INV-001',
+          amount: 'K1,500',
+          invoiceNo: 'INV-001',
+          termInfo: 'Term 1 2025',
+          currentBalance: 'K500',
+          receipts: [
+            {
+              date: 'Wed',
+              day: '19',
+              receiptNo: 'Receipt No. 00352',
+              paymentMethod: 'Airtel Money',
+              amount: 'K500',
+              balanceAfter: 'K1,000',
+            },
+            {
+              date: 'Fri',
+              day: '21',
+              receiptNo: 'Receipt No. 00355',
+              paymentMethod: 'MTN Mobile Money',
+              amount: 'K500',
+              balanceAfter: 'K500',
+            },
+          ],
+        },
+        {
+          date: 'Mon',
+          day: '17',
+          title: 'Lab Fees - Science Department',
+          subtitle: 'Invoice No. INV-002',
+          amount: 'K300',
+          invoiceNo: 'INV-002',
+          termInfo: 'Term 1 2025',
+          currentBalance: 'K0',
+          receipts: [
+            {
+              date: 'Mon',
+              day: '17',
+              receiptNo: 'Receipt No. 00348',
+              paymentMethod: 'Airtel Money',
+              amount: 'K300',
+              balanceAfter: 'K0',
+            },
+          ],
+        },
+      ],
+      [`${currentYear}-${currentMonth - 1}`]: [
+        {
+          date: 'Thu',
+          day: '12',
+          title: 'School Fees - Grade 3B',
+          subtitle: 'Invoice No. INV-003',
+          amount: 'K1,800',
+          invoiceNo: 'INV-003',
+          termInfo: 'Term 4 2024',
+          currentBalance: 'K0',
+          receipts: [
+            {
+              date: 'Thu',
+              day: '12',
+              receiptNo: 'Receipt No. 00290',
+              paymentMethod: 'Bank Transfer',
+              amount: 'K900',
+              balanceAfter: 'K900',
+            },
+            {
+              date: 'Fri',
+              day: '20',
+              receiptNo: 'Receipt No. 00295',
+              paymentMethod: 'Airtel Money',
+              amount: 'K900',
+              balanceAfter: 'K0',
+            },
+          ],
+        },
+      ],
+      [`${currentYear}-${currentMonth - 2}`]: [],
+    },
+    'C30013': {
+      [`${currentYear}-${currentMonth}`]: [
+        {
+          date: 'Fri',
+          day: '22',
+          title: 'School Fees - Grade 4A',
+          subtitle: 'Invoice No. INV-004',
+          amount: 'K2,000',
+          invoiceNo: 'INV-004',
+          termInfo: 'Term 1 2025',
+          currentBalance: 'K800',
+          receipts: [
+            {
+              date: 'Fri',
+              day: '22',
+              receiptNo: 'Receipt No. 00360',
+              paymentMethod: 'MTN Mobile Money',
+              amount: 'K600',
+              balanceAfter: 'K1,400',
+            },
+            {
+              date: 'Mon',
+              day: '25',
+              receiptNo: 'Receipt No. 00362',
+              paymentMethod: 'Airtel Money',
+              amount: 'K600',
+              balanceAfter: 'K800',
+            },
+          ],
+        },
+      ],
+      [`${currentYear}-${currentMonth - 1}`]: [
+        {
+          date: 'Wed',
+          day: '18',
+          title: 'Sports Fees - Athletics',
+          subtitle: 'Invoice No. INV-005',
+          amount: 'K150',
+          invoiceNo: 'INV-005',
+          termInfo: 'Term 4 2024',
+          currentBalance: 'K0',
+          receipts: [
+            {
+              date: 'Wed',
+              day: '18',
+              receiptNo: 'Receipt No. 00285',
+              paymentMethod: 'Airtel Money',
+              amount: 'K150',
+              balanceAfter: 'K0',
+            },
+          ],
+        },
+      ],
+      [`${currentYear}-${currentMonth - 2}`]: [],
+    },
+    'C20013': {
+      [`${currentYear}-${currentMonth}`]: [
+        {
+          date: 'Mon',
+          day: '17',
+          title: 'School Fees - Grade 5A',
+          subtitle: 'Invoice No. INV-006',
+          amount: 'K1,200',
+          invoiceNo: 'INV-006',
+          termInfo: 'Term 1 2025',
+          currentBalance: 'K400',
+          receipts: [
+            {
+              date: 'Mon',
+              day: '17',
+              receiptNo: 'Receipt No. 00350',
+              paymentMethod: 'Bank Transfer',
+              amount: 'K400',
+              balanceAfter: 'K800',
+            },
+            {
+              date: 'Wed',
+              day: '19',
+              receiptNo: 'Receipt No. 00353',
+              paymentMethod: 'MTN Mobile Money',
+              amount: 'K400',
+              balanceAfter: 'K400',
+            },
+          ],
+        },
+      ],
+      [`${currentYear}-${currentMonth - 1}`]: [
+        {
+          date: 'Tue',
+          day: '15',
+          title: 'Library Fees',
+          subtitle: 'Invoice No. INV-007',
+          amount: 'K80',
+          invoiceNo: 'INV-007',
+          termInfo: 'Term 4 2024',
+          currentBalance: 'K0',
+          receipts: [
+            {
+              date: 'Tue',
+              day: '15',
+              receiptNo: 'Receipt No. 00280',
+              paymentMethod: 'Airtel Money',
+              amount: 'K80',
+              balanceAfter: 'K0',
+            },
+          ],
+        },
+      ],
+      [`${currentYear}-${currentMonth - 2}`]: [],
+    },
+    'C20014': {
+      [`${currentYear}-${currentMonth}`]: [],
+      [`${currentYear}-${currentMonth - 1}`]: [],
+      [`${currentYear}-${currentMonth - 2}`]: [
+        {
+          date: 'Tue',
+          day: '05',
+          title: 'School Fees - Grade 6B',
+          subtitle: 'Invoice No. INV-008',
+          amount: 'K1,000',
+          invoiceNo: 'INV-008',
+          termInfo: 'Term 3 2024',
+          currentBalance: 'K0',
+          receipts: [
+            {
+              date: 'Tue',
+              day: '05',
+              receiptNo: 'Receipt No. 00180',
+              paymentMethod: 'Bank Transfer',
+              amount: 'K500',
+              balanceAfter: 'K500',
+            },
+            {
+              date: 'Thu',
+              day: '14',
+              receiptNo: 'Receipt No. 00185',
+              paymentMethod: 'Airtel Money',
+              amount: 'K500',
+              balanceAfter: 'K0',
+            },
+          ],
+        },
+      ],
+    },
+  };
+};

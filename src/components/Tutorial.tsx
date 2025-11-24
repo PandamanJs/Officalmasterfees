@@ -6,7 +6,7 @@ import { X } from "lucide-react";
  * Interface for each tutorial step
  */
 interface TutorialStep {
-  title: string;        // Step heading with emoji
+  title: string;        // Step heading
   description: string;  // Detailed explanation
   position: "center" | "top" | "bottom";  // Vertical positioning
 }
@@ -14,42 +14,43 @@ interface TutorialStep {
 /**
  * Tutorial step content
  * Guides users through the main features of the app
+ * Designed with Apple's minimalist aesthetic
  */
 const tutorialSteps: TutorialStep[] = [
   {
-    title: "Welcome to Master-Fees! 👋",
-    description: "Let's take a quick tour to help you get started with managing your school fee payments.",
-    position: "center"
+    title: "Welcome to Master-Fees",
+    description: "A better way to manage school fee payments. Fast, secure, and effortlessly simple.",
+    position: "center",
   },
   {
-    title: "Search for Students 🔍",
-    description: "Use the search bar to quickly find students by name. Just start typing and we'll show you matching results.",
-    position: "top"
+    title: "Find Students Instantly",
+    description: "Search by name and see instant results. The students you select most often appear first.",
+    position: "top",
   },
   {
-    title: "Select Services 📋",
-    description: "Browse and select the services you need to pay for. You can select multiple services for one or more students.",
-    position: "center"
+    title: "Select What You Need",
+    description: "Choose services for one or more students. Everything is organized, clear, and easy to review.",
+    position: "center",
   },
   {
-    title: "Review Your Selection ✓",
-    description: "Check your selected items and see the total amount. You can adjust quantities or remove items before proceeding.",
-    position: "center"
+    title: "Review Before You Pay",
+    description: "Check your selection and total amount. Make changes if needed, then proceed with confidence.",
+    position: "center",
   },
   {
-    title: "Choose Payment Method 💳",
-    description: "We support Mobile Money (Airtel, MTN, Zamtel) and Card Payments (Visa, Mastercard). Pick what works best for you.",
-    position: "bottom"
+    title: "Pay Your Way",
+    description: "Mobile Money or Card. Choose what works for you. All transactions are encrypted and secure.",
+    position: "bottom",
   },
   {
-    title: "View Your Receipts 📄",
-    description: "After payment, you can view and download your receipts anytime. They're organized by month for easy access.",
-    position: "center"
+    title: "Access Receipts Anytime",
+    description: "Download receipts instantly or view your complete payment history, organized by month.",
+    position: "center",
   },
   {
-    title: "You're All Set! 🎉",
-    description: "That's it! You're ready to start managing your school fee payments. Tap 'Get Started' to begin.",
-    position: "center"
+    title: "Ready to Begin",
+    description: "Everything you need is just a tap away. Let's get started.",
+    position: "center",
   }
 ];
 
@@ -67,7 +68,7 @@ export default function Tutorial({ onComplete }: TutorialProps) {
    */
   const handleNext = () => {
     if (currentStep < tutorialSteps.length - 1) {
-      setCurrentStep(currentStep + 1);
+      setCurrentStep(prev => prev + 1);
     } else {
       handleComplete();
     }
@@ -89,7 +90,7 @@ export default function Tutorial({ onComplete }: TutorialProps) {
     setIsVisible(false);
     setTimeout(() => {
       onComplete();
-    }, 300);
+    }, 400);
   };
 
   const currentStepData = tutorialSteps[currentStep];
@@ -110,6 +111,13 @@ export default function Tutorial({ onComplete }: TutorialProps) {
     }
   };
 
+  // Apple's signature spring animation config
+  const springConfig = {
+    type: "spring" as const,
+    damping: 40,
+    stiffness: 400,
+  };
+
   return (
     <AnimatePresence>
       {isVisible && (
@@ -117,108 +125,191 @@ export default function Tutorial({ onComplete }: TutorialProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{
+            backgroundColor: "rgba(0, 0, 0, 0.75)",
+            backdropFilter: "blur(40px) saturate(180%)",
+            WebkitBackdropFilter: "blur(40px) saturate(180%)",
+          }}
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               handleSkip();
             }
           }}
         >
-          <div className={`w-full h-full flex px-6 ${getPositionClasses()}`}>
-            <motion.div
-              key={currentStep}
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative"
-            >
-              {/* Close Button */}
-              <button
-                onClick={handleSkip}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          <div className={`w-full h-full flex px-6 relative ${getPositionClasses()}`}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentStep}
+                initial={{ 
+                  scale: 0.92, 
+                  opacity: 0,
+                  y: 20,
+                }}
+                animate={{ 
+                  scale: 1, 
+                  opacity: 1, 
+                  y: 0,
+                }}
+                exit={{ 
+                  scale: 0.92, 
+                  opacity: 0, 
+                  y: -20,
+                }}
+                transition={{ 
+                  duration: 0.5,
+                  ease: [0.25, 0.1, 0.25, 1],
+                }}
+                className="max-w-[440px] w-full relative"
+                style={{
+                  backgroundColor: "rgba(255, 255, 255, 0.95)",
+                  backdropFilter: "blur(60px) saturate(200%)",
+                  WebkitBackdropFilter: "blur(60px) saturate(200%)",
+                  boxShadow: "0 24px 48px rgba(0, 0, 0, 0.2), 0 0 0 0.5px rgba(255, 255, 255, 0.5) inset",
+                  borderRadius: "24px",
+                  padding: "48px 40px",
+                }}
               >
-                <X className="w-5 h-5" />
-              </button>
-
-              {/* Content */}
-              <div className="mb-6">
-                <h2 className="font-['IBM_Plex_Sans_Devanagari:Bold',sans-serif] text-[24px] text-[#003630] mb-3">
-                  {currentStepData.title}
-                </h2>
-                <p className="font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] text-[16px] text-gray-700 leading-relaxed">
-                  {currentStepData.description}
-                </p>
-              </div>
-
-              {/* Progress Indicators */}
-              <div className="flex gap-2 mb-6">
-                {tutorialSteps.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`h-1.5 rounded-full flex-1 transition-all duration-300 ${
-                      index === currentStep
-                        ? "bg-[#95e36c]"
-                        : index < currentStep
-                        ? "bg-[#003630]"
-                        : "bg-gray-200"
-                    }`}
-                  />
-                ))}
-              </div>
-
-              {/* Step Counter */}
-              <div className="flex items-center justify-between mb-4">
-                <p className="font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] text-[14px] text-gray-500">
-                  Step {currentStep + 1} of {tutorialSteps.length}
-                </p>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-3">
-                {!isLastStep && (
-                  <button
-                    onClick={handleSkip}
-                    className="flex-1 px-6 py-3 rounded-xl border-2 border-gray-200 font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] text-[16px] text-gray-600 hover:bg-gray-50 transition-colors"
-                  >
-                    Skip Tutorial
-                  </button>
-                )}
-                <button
-                  onClick={handleNext}
-                  className={`${
-                    isLastStep ? "flex-1" : "flex-1"
-                  } px-6 py-3 rounded-xl bg-[#003630] font-['IBM_Plex_Sans_Devanagari:Bold',sans-serif] text-[16px] text-white hover:bg-[#004d45] transition-colors active:scale-[0.98]`}
+                {/* Close Button - Apple style */}
+                <motion.button
+                  whileHover={{ 
+                    scale: 1.1,
+                    backgroundColor: "rgba(0, 0, 0, 0.06)",
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleSkip}
+                  transition={springConfig}
+                  className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full"
+                  style={{
+                    backgroundColor: "rgba(0, 0, 0, 0.03)",
+                  }}
                 >
-                  {isLastStep ? "Get Started" : "Next"}
-                </button>
-              </div>
-            </motion.div>
-          </div>
+                  <X className="w-4 h-4 text-black/40" strokeWidth={2} />
+                </motion.button>
 
-          {/* Animated Background Elements */}
-          <motion.div
-            animate={{
-              rotate: [0, 360],
-            }}
-            transition={{
-              duration: 20,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-            className="absolute top-20 left-10 w-24 h-24 rounded-full bg-[#95e36c]/20 blur-2xl"
-          />
-          <motion.div
-            animate={{
-              rotate: [360, 0],
-            }}
-            transition={{
-              duration: 25,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-            className="absolute bottom-20 right-10 w-32 h-32 rounded-full bg-[#003630]/20 blur-2xl"
-          />
+                {/* Content */}
+                <div className="mb-8">
+                  <motion.h2
+                    key={`title-${currentStep}`}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                    className="font-['SF_Pro_Display:Bold',system-ui,-apple-system,sans-serif] text-[34px] tracking-[-0.02em] text-black mb-4 leading-[1.15]"
+                    style={{
+                      fontWeight: 700,
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    {currentStepData.title}
+                  </motion.h2>
+                  
+                  <motion.p
+                    key={`desc-${currentStep}`}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                    className="font-['SF_Pro_Text:Regular',system-ui,-apple-system,sans-serif] text-[17px] text-black/70 leading-[1.47]"
+                    style={{
+                      fontWeight: 400,
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    {currentStepData.description}
+                  </motion.p>
+                </div>
+
+                {/* Progress Indicators - Apple style dots */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2, duration: 0.3 }}
+                  className="flex gap-2 mb-8 justify-center"
+                >
+                  {tutorialSteps.map((step, index) => (
+                    <motion.div
+                      key={index}
+                      initial={false}
+                      animate={{
+                        width: index === currentStep ? "28px" : "6px",
+                        opacity: index === currentStep ? 1 : index < currentStep ? 0.4 : 0.2,
+                      }}
+                      transition={{ 
+                        duration: 0.4,
+                        ease: [0.25, 0.1, 0.25, 1],
+                      }}
+                      className="h-[6px] rounded-full"
+                      style={{
+                        backgroundColor: index === currentStep ? "#003630" : "#000000",
+                      }}
+                    />
+                  ))}
+                </motion.div>
+
+                {/* Step Counter - Apple style */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.25, duration: 0.3 }}
+                  className="flex items-center justify-center mb-8"
+                >
+                  <p className="font-['SF_Pro_Text:Medium',system-ui,-apple-system,sans-serif] text-[13px] text-black/40 tracking-[-0.01em]">
+                    {currentStep + 1} of {tutorialSteps.length}
+                  </p>
+                </motion.div>
+
+                {/* Actions - Apple style buttons */}
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.4 }}
+                  className="flex flex-col gap-3"
+                >
+                  <motion.button
+                    whileHover={{ 
+                      scale: 1.01,
+                      backgroundColor: "#002420",
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNext();
+                    }}
+                    transition={springConfig}
+                    className="w-full px-6 py-[14px] rounded-full font-['SF_Pro_Text:Semibold',system-ui,-apple-system,sans-serif] text-[17px] text-white tracking-[-0.01em]"
+                    style={{
+                      backgroundColor: "#003630",
+                      boxShadow: "0 2px 8px rgba(0, 54, 48, 0.25), 0 0 0 0.5px rgba(255, 255, 255, 0.15) inset",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {isLastStep ? "Get Started" : "Continue"}
+                  </motion.button>
+                  
+                  {!isLastStep && (
+                    <motion.button
+                      whileHover={{ 
+                        backgroundColor: "rgba(0, 0, 0, 0.04)",
+                      }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSkip();
+                      }}
+                      transition={springConfig}
+                      className="w-full px-6 py-[14px] rounded-full font-['SF_Pro_Text:Regular',system-ui,-apple-system,sans-serif] text-[17px] text-black/60 tracking-[-0.01em]"
+                      style={{
+                        backgroundColor: "rgba(0, 0, 0, 0.02)",
+                        fontWeight: 400,
+                      }}
+                    >
+                      Skip
+                    </motion.button>
+                  )}
+                </motion.div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
