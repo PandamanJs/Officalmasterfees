@@ -255,81 +255,100 @@ function PaymentPlanCard({
  * Main Payment Plans Page
  */
 export default function ViewPaymentPlansPage({ onBack, schoolName }: ViewPaymentPlansPageProps) {
-  // Professional payment plans data
+  // Professional payment plans data - Per Term
   const paymentPlans: PaymentPlan[] = [
     {
       id: "full",
-      planCode: "FP-2025",
-      name: "Full Payment Plan",
-      description: "Single upfront payment for the entire academic year",
+      planCode: "FP-T1-2025",
+      name: "Full Term Payment",
+      description: "Single upfront payment for the entire term",
       installments: 1,
       frequency: "one-time",
-      totalAmount: 12000,
-      perInstallment: 12000,
+      totalAmount: 10000,
+      perInstallment: 10000,
       effectiveDate: "Jan 15, 2025",
       dueDate: "Jan 15, 2025",
       terms: [
         "Payment must be received by the effective date to avoid late fees",
-        "5% early payment discount applied automatically",
-        "Non-refundable after 14 days of enrollment confirmation",
-        "Includes all standard tuition and administrative fees",
-        "Additional services and materials not included"
+        "5% early payment discount applied automatically (K9,500 total)",
+        "Non-refundable after 7 days of term commencement",
+        "Covers tuition for Term 1 only (January - April 2025)",
+        "Additional services and materials billed separately"
       ]
     },
     {
-      id: "termly",
-      planCode: "TP-2025",
-      name: "Termly Payment Plan",
-      description: "Three equal installments aligned with academic terms",
-      installments: 3,
-      frequency: "term",
-      totalAmount: 12600,
-      perInstallment: 4200,
+      id: "bi-monthly",
+      planCode: "BM-T1-2025",
+      name: "Bi-Monthly Payment Plan",
+      description: "Two equal installments spread across the term",
+      installments: 2,
+      frequency: "payment",
+      totalAmount: 10300,
+      perInstallment: 5150,
       effectiveDate: "Jan 15, 2025",
-      dueDate: "Sep 30, 2025",
+      dueDate: "Mar 15, 2025",
       terms: [
-        "First payment due at start of Term 1 (January)",
-        "Second payment due at start of Term 2 (May)",
-        "Third payment due at start of Term 3 (September)",
-        "Late fee of K150 applied for payments received after the 15th of each term month",
+        "First payment due January 15, 2025 (term commencement)",
+        "Second payment due March 15, 2025 (mid-term)",
+        "Late fee of K200 applied for payments received after the 20th",
+        "Both payments must be completed within Term 1 period",
         "Missed payments may result in temporary suspension of services"
       ]
     },
     {
       id: "monthly",
-      planCode: "MP-2025",
+      planCode: "MP-T1-2025",
       name: "Monthly Payment Plan",
-      description: "Ten monthly installments spread across the academic year",
-      installments: 10,
+      description: "Three monthly installments across the 3.5 month term",
+      installments: 3,
       frequency: "month",
-      totalAmount: 13200,
-      perInstallment: 1320,
+      totalAmount: 10500,
+      perInstallment: 3500,
       effectiveDate: "Jan 15, 2025",
-      dueDate: "Oct 31, 2025",
+      dueDate: "Mar 15, 2025",
       terms: [
-        "Payments due on the 15th of each month from January to October",
-        "Automatic payment option available through authorized accounts",
-        "Late fee of K80 applied for payments received after the 20th",
-        "Two consecutive missed payments may result in account review",
-        "Payment schedule excludes November and December"
+        "First payment due January 15, 2025",
+        "Second payment due February 15, 2025",
+        "Third payment due March 15, 2025",
+        "Late fee of K150 applied for payments received after the 20th of each month",
+        "All payments must be completed by mid-March before term end"
+      ]
+    },
+    {
+      id: "weekly",
+      planCode: "WP-T1-2025",
+      name: "Weekly Payment Plan",
+      description: "Fourteen weekly installments throughout the term period",
+      installments: 14,
+      frequency: "week",
+      totalAmount: 10700,
+      perInstallment: 764,
+      effectiveDate: "Jan 15, 2025",
+      dueDate: "Apr 20, 2025",
+      terms: [
+        "Payments due every Monday starting January 15, 2025",
+        "14 consecutive weekly payments throughout Term 1",
+        "Automatic payment option strongly recommended",
+        "Late fee of K50 applied for payments received after Wednesday",
+        "Two consecutive missed payments may trigger account review"
       ]
     },
     {
       id: "custom",
-      planCode: "CP-2025",
+      planCode: "CP-T1-2025",
       name: "Custom Payment Arrangement",
-      description: "Personalized payment schedule based on individual circumstances",
+      description: "Personalized payment schedule within the term period",
       installments: 0,
       frequency: "flexible",
       totalAmount: 0,
       perInstallment: 0,
       effectiveDate: "Upon Approval",
-      dueDate: "As Agreed",
+      dueDate: "Within Term 1",
       terms: [
         "Requires formal application and financial documentation review",
+        "Must be arranged before term commencement or within first week",
+        "All payments must be completed within the 3.5 month term period",
         "Subject to approval by school administration and finance committee",
-        "Terms and conditions negotiated on a case-by-case basis",
-        "May require guarantor or additional security deposit",
         "Contact the bursar's office to initiate the application process"
       ]
     }
@@ -348,13 +367,13 @@ export default function ViewPaymentPlansPage({ onBack, schoolName }: ViewPayment
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           >
             <h1 className="font-['IBM_Plex_Sans_Devanagari:Bold',sans-serif] text-[24px] text-[#003630] tracking-[-0.5px] mb-[4px]">
-              Payment Plans Overview
+              Term 1 Payment Plans
             </h1>
             <p className="font-['IBM_Plex_Sans_Devanagari:Medium',sans-serif] text-[13px] text-[#003630] mb-[2px]">
               {schoolName}
             </p>
             <p className="font-['IBM_Plex_Sans_Devanagari:Regular',sans-serif] text-[12px] text-[#9ca3af] leading-[1.5]">
-              Academic Year 2024-2025 • Effective January 2025
+              Term 1: January - April 2025 (3.5 months) • Tuition: K10,000
             </p>
           </motion.div>
         </div>
